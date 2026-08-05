@@ -1,0 +1,273 @@
+/* ─────────────────────────────────────────────────────────
+   CT Battery Solutions Project Calculator v9 — faithful reproduction.
+   Scoped under `.calc-v9`.
+   ───────────────────────────────────────────────────────── */
+
+.calc-v9 {
+  --bg: #FAF8F3;
+  --bg-card: #FFFFFF;
+  --bg-card-2: #F4F1E8;
+  --bg-elevated: #F0EDE5;
+  --text: #2C2C2A;
+  --text-2: #5F5E5A;
+  --text-3: #888780;
+  --border: #E5E1D5;
+  --border-strong: #D3D1C7;
+  --green: #0F6E56;
+  --green-l: #E1F5EE;
+  --blue: #185FA5;
+  --blue-l: #E6F1FB;
+  --amber: #BA7517;
+  --amber-l: #FAEEDA;
+  --purple: #534AB7;
+  --purple-l: #EEEDFE;
+  --red: #A32D2D;
+  --red-l: #FCEBEB;
+  --sans: var(--font-dm-sans), sans-serif;
+  --serif: var(--font-dm-serif), serif;
+  --mono: var(--font-dm-mono), monospace;
+
+  font-family: var(--sans);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 14px;
+}
+.calc-v9 *, .calc-v9 *::before, .calc-v9 *::after {
+  box-sizing: border-box;
+}
+
+.calc-v9 .hdr {
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+.calc-v9 .brand {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.calc-v9 .brand strong { color: var(--text); font-weight: 600; }
+.calc-v9 h1 {
+  font-family: var(--serif);
+  font-size: 38px;
+  line-height: 1.12;
+  font-weight: 400;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.calc-v9 h1 em { font-style: italic; color: var(--green); }
+.calc-v9 .sub {
+  font-size: 15px;
+  color: var(--text-2);
+  max-width: 760px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.calc-v9 .sec-l {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 32px 0 14px;
+  font-weight: 500;
+}
+.calc-v9 .sec-l span { color: var(--text); font-weight: 600; }
+
+.calc-v9 .grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.calc-v9 .grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 800px) {
+  .calc-v9 .grid-3, .calc-v9 .grid-2 { grid-template-columns: 1fr; }
+}
+
+.calc-v9 .card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+}
+.calc-v9 .card-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-v9 .row { margin-bottom: 16px; }
+.calc-v9 .row:last-child { margin-bottom: 0; }
+.calc-v9 .row-l {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.calc-v9 .pills {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.calc-v9 .pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--bg);
+  transition: all 0.12s ease;
+  color: var(--text-2);
+  font-weight: 500;
+  user-select: none;
+}
+.calc-v9 .pill:hover { border-color: var(--text-3); color: var(--text); }
+.calc-v9 .pill.on {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.calc-v9 table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.calc-v9 table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.calc-v9 table td {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.calc-v9 table tr:last-child td { border-bottom: none; }
+.calc-v9 .r { text-align: right; }
+.calc-v9 .m { font-family: var(--mono); }
+.calc-v9 .bold { font-weight: 600; color: var(--text); }
+.calc-v9 .tot td {
+  font-weight: 600;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 12px 0;
+  background: var(--bg-elevated);
+}
+.calc-v9 .gp { color: var(--green); }
+.calc-v9 .bp { color: var(--blue); }
+.calc-v9 .ap { color: var(--amber); }
+.calc-v9 .pp { color: var(--purple); }
+.calc-v9 .rp { color: var(--red); }
+
+.calc-v9 .kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 24px 0 8px;
+}
+@media (max-width: 800px) {
+  .calc-v9 .kpi-row { grid-template-columns: 1fr 1fr; }
+}
+.calc-v9 .kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.calc-v9 .kpi .l {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.calc-v9 .kpi .v {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.calc-v9 .note {
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: var(--mono);
+  line-height: 1.65;
+  background: var(--bg-elevated);
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+.calc-v9 .note strong { color: var(--text); }
+
+.calc-v9 .tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.calc-v9 .tag.gp { background: var(--green-l); color: var(--green); }
+.calc-v9 .tag.bp { background: var(--blue-l); color: var(--blue); }
+.calc-v9 .tag.pp { background: var(--purple-l); color: var(--purple); }
+.calc-v9 .tag.ap { background: var(--amber-l); color: var(--amber); }
+
+.calc-v9 .sub-row td {
+  padding-top: 14px !important;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: none;
+}
+
+.calc-v9 .constraint-banner {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.calc-v9 .constraint-banner.energy {
+  background: var(--amber-l);
+  color: var(--amber);
+}
+.calc-v9 .constraint-banner.power {
+  background: var(--blue-l);
+  color: var(--blue);
+}

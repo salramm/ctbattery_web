@@ -1,0 +1,277 @@
+/* Battery Systems page — focused on Enphase IQ Battery 10C.
+   Scoped under `.eq-page`. */
+
+.eq-page {
+  --bg: #FAF8F3;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #F0EDE5;
+  --text: #2C2C2A;
+  --text-2: #5F5E5A;
+  --text-3: #888780;
+  --border: #E5E1D5;
+  --border-strong: #D3D1C7;
+  --green: #0F6E56;
+  --green-l: #E1F5EE;
+  --blue: #185FA5;
+  --blue-l: #E6F1FB;
+  --sans: var(--font-dm-sans), sans-serif;
+  --serif: var(--font-dm-serif), serif;
+  --mono: var(--font-dm-mono), monospace;
+
+  font-family: var(--sans);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.eq-page *, .eq-page *::before, .eq-page *::after { box-sizing: border-box; }
+
+.eq-page .hdr {
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+.eq-page .brand {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.eq-page .brand strong { color: var(--text); font-weight: 600; }
+.eq-page h1 {
+  font-family: var(--serif);
+  font-size: 38px;
+  line-height: 1.12;
+  font-weight: 400;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.eq-page h1 em { font-style: italic; color: var(--green); }
+.eq-page .sub {
+  font-size: 15px;
+  color: var(--text-2);
+  max-width: 760px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.eq-page .sec-l {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 32px 0 14px;
+  font-weight: 500;
+}
+.eq-page .sec-l span { color: var(--text); font-weight: 600; }
+
+/* Hero product card */
+.eq-page .hero-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+}
+@media (max-width: 800px) {
+  .eq-page .hero-card { grid-template-columns: 1fr; }
+}
+.eq-page .hero-photo {
+  background: #fff;
+  border-right: 1px solid var(--border);
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+@media (max-width: 800px) {
+  .eq-page .hero-photo {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    aspect-ratio: 4/3;
+  }
+}
+.eq-page .hero-photo .photo-tag {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+.eq-page .hero-info {
+  padding: 28px 32px;
+}
+.eq-page .badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--green-l);
+  color: var(--green);
+  padding: 4px 9px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.eq-page .hero-info h2 {
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 400;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+.eq-page .vendor {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  margin-bottom: 18px;
+}
+.eq-page .vendor a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid var(--border-strong); }
+.eq-page .vendor a:hover { color: var(--text); }
+.eq-page .hero-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin: 0 0 20px;
+}
+
+/* Specs grid */
+.eq-page .specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.eq-page .spec {
+  background: var(--bg-card);
+  padding: 14px 16px;
+}
+.eq-page .spec .k {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.eq-page .spec .v {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* System sizing card */
+.eq-page .card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+.eq-page .card-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.eq-page table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.eq-page table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.eq-page table th.r, .eq-page table td.r { text-align: right; }
+.eq-page table td {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.eq-page table tr:last-child td { border-bottom: none; }
+.eq-page table .m { font-family: var(--mono); }
+.eq-page table .b { font-weight: 600; color: var(--text); }
+.eq-page table .gp { color: var(--green); }
+.eq-page table tr.recommended {
+  background: var(--green-l);
+}
+.eq-page table tr.recommended td:first-child {
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+/* Hardware list */
+.eq-page .hw-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.eq-page .hw-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.eq-page .hw-item h4 {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+.eq-page .hw-item .part {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.eq-page .hw-item p {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Note */
+.eq-page .note {
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-family: var(--mono);
+  line-height: 1.65;
+  background: var(--bg-elevated);
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+.eq-page .note strong { color: var(--text); }
