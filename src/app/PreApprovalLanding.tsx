@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { MAIN, MODAL_CARD, STYLES } from "./preApprovalContent";
 
 const FONTS =
@@ -21,10 +22,50 @@ export default function PreApprovalLanding() {
         setLegalOpen(true);
       }
     };
-    const onSubmit = (e: Event) => {
+    const onSubmit = async (e: Event) => {
       e.preventDefault();
+      const form = e.target as HTMLFormElement;
       const msg = el.querySelector<HTMLElement>("#dc-submit-msg");
-      if (msg) msg.style.display = "block";
+      const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      const fd = new FormData(form);
+      const val = (k: string) => {
+        const v = String(fd.get(k) ?? "").trim();
+        return v || undefined;
+      };
+      const show = (text: string, ok: boolean) => {
+        if (!msg) return;
+        msg.textContent = text;
+        msg.style.display = "block";
+        if (!ok) {
+          msg.style.background = "#fdecec";
+          msg.style.borderLeftColor = "#c0392b";
+          msg.style.color = "#7a1f1f";
+        }
+      };
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        await apiFetch("/api/leads", {
+          method: "POST",
+          body: JSON.stringify({
+            email: val("email"),
+            firstName: val("first"),
+            lastName: val("last"),
+            cityOrZip: val("city"),
+            phone: val("phone"),
+            tenure: val("tenure"),
+            source: "pre-approval-landing",
+          }),
+        });
+        show(
+          "Thanks — you're on the list. We'll email you if and when CT Battery Solutions is approved and enrollment opens in your area.",
+          true,
+        );
+        form.reset();
+      } catch (err) {
+        show(err instanceof Error ? err.message : "Something went wrong — please try again.", false);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     };
     el.addEventListener("click", onClick);
     el.addEventListener("submit", onSubmit);
