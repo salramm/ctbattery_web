@@ -30,7 +30,6 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
 <a href="#basics" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The basics</a>
 <a href="#program" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The program</a>
-<a href="#company" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">Who we are</a>
 <a href="#join" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#1a1a1a;border-radius:4px;padding:9px 15px;text-decoration:none">Join the list</a>
 </div>
 </div>
@@ -255,25 +254,6 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 </div>
 </section>
 
-
-<section id="company" style="padding:clamp(48px,6vw,80px) 0;border-bottom:1px solid #e5e3dc">
-<div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
-<p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">Who we are</p>
-<h2 style="margin:0 0 28px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">Everything we can verify, in one place.</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:clamp(22px,3vw,40px);align-items:start">
-<div style="display:flex;flex-direction:column;gap:16px">
-<p style="margin:0;font-size:17px;line-height:1.62;color:#3a3a37;text-wrap:pretty">CT Battery Solutions is working on one thing: bringing residential battery storage into Connecticut homes, including rentals and affordable housing, through the state's program.</p>
-</div>
-<div style="background:#f2f1ec;border:1px solid #d8d6ce;border-radius:10px;padding:6px 22px">
-<div style="display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #d8d6ce;font-size:15.5px;flex-wrap:wrap"><span style="color:#6b6b66">Legal entity</span><span style="font-weight:500;text-align:right">CT Battery Solutions, Inc. · Delaware</span></div>
-<div style="display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #d8d6ce;font-size:15.5px;flex-wrap:wrap"><span style="color:#6b6b66">CT registration</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:#7A5B0A;background:#FBF0DA;border-radius:4px;padding:3px 9px">In progress</span></div>
-<div style="display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #d8d6ce;font-size:15.5px;flex-wrap:wrap"><span style="color:#6b6b66">Green Bank ESS application</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:#7A5B0A;background:#FBF0DA;border-radius:4px;padding:3px 9px">In progress</span></div>
-<div style="display:flex;justify-content:space-between;gap:16px;padding:14px 0;font-size:15.5px;flex-wrap:wrap"><span style="color:#6b6b66">Systems installed to date</span><span style="font-weight:500">None</span></div>
-</div>
-</div>
-</div>
-</section>
-
 <section id="join" style="padding:clamp(48px,6vw,84px) 0;border-bottom:1px solid #e5e3dc;background:#f2f1ec">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:clamp(32px,5vw,72px);align-items:start">
 <div>
@@ -336,7 +316,6 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="display:flex;gap:22px;flex-wrap:wrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px">
 <a href="#basics" style="color:#6b6b66;text-decoration:none">The basics</a>
 <a href="#program" style="color:#6b6b66;text-decoration:none">The program</a>
-<a href="#company" style="color:#6b6b66;text-decoration:none">Who we are</a>
 <a href="#join" style="color:#6b6b66;text-decoration:none">Join the list</a>
 </div>
 </div>
