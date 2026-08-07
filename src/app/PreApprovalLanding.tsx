@@ -1,20 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { createPortal } from "react-dom";
 import { MAIN, MODAL_CARD, STYLES } from "./preApprovalContent";
+import HeroAddressSearch from "./HeroAddressSearch";
 
 const FONTS =
   "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap";
 
 export default function PreApprovalLanding() {
   const [legalOpen, setLegalOpen] = useState(false);
+  const [searchMount, setSearchMount] = useState<HTMLElement | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // Wire the static (innerHTML) content: legal-modal triggers + form preview.
+  // Wire the static (innerHTML) content: legal-modal triggers + locate the
+  // address-search mount point for the portal.
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
+    setSearchMount(el.querySelector<HTMLElement>("#ctbs-address-search"));
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
       if (t.closest("[data-open-legal]")) {
@@ -22,56 +26,9 @@ export default function PreApprovalLanding() {
         setLegalOpen(true);
       }
     };
-    const onSubmit = async (e: Event) => {
-      e.preventDefault();
-      const form = e.target as HTMLFormElement;
-      const msg = el.querySelector<HTMLElement>("#dc-submit-msg");
-      const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-      const fd = new FormData(form);
-      const val = (k: string) => {
-        const v = String(fd.get(k) ?? "").trim();
-        return v || undefined;
-      };
-      const show = (text: string, ok: boolean) => {
-        if (!msg) return;
-        msg.textContent = text;
-        msg.style.display = "block";
-        if (!ok) {
-          msg.style.background = "#fdecec";
-          msg.style.borderLeftColor = "#c0392b";
-          msg.style.color = "#7a1f1f";
-        }
-      };
-      if (submitBtn) submitBtn.disabled = true;
-      try {
-        await apiFetch("/api/leads", {
-          method: "POST",
-          body: JSON.stringify({
-            email: val("email"),
-            firstName: val("first"),
-            lastName: val("last"),
-            cityOrZip: val("city"),
-            phone: val("phone"),
-            tenure: val("tenure"),
-            source: "pre-approval-landing",
-          }),
-        });
-        show(
-          "Thanks — you're on the list. We'll email you if and when CT Battery Solutions is approved and enrollment opens in your area.",
-          true,
-        );
-        form.reset();
-      } catch (err) {
-        show(err instanceof Error ? err.message : "Something went wrong — please try again.", false);
-      } finally {
-        if (submitBtn) submitBtn.disabled = false;
-      }
-    };
     el.addEventListener("click", onClick);
-    el.addEventListener("submit", onSubmit);
     return () => {
       el.removeEventListener("click", onClick);
-      el.removeEventListener("submit", onSubmit);
     };
   }, []);
 
@@ -97,6 +54,7 @@ export default function PreApprovalLanding() {
       <style dangerouslySetInnerHTML={{ __html: `${STYLES}\n#dc-submit-msg{display:none}` }} />
 
       <div ref={mainRef} dangerouslySetInnerHTML={{ __html: MAIN }} />
+      {searchMount && createPortal(<HeroAddressSearch />, searchMount)}
 
       {legalOpen && (
         <div

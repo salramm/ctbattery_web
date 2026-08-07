@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { apiFetch } from "@/lib/api";
+
+const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+declare global {
+  // `google` is declared (as any) by AddressSearch's global augmentation.
+  interface Window { initCtbsMaps?: () => void }
+}
 
 const C = {
   brand: "#2f5d4e",
@@ -32,6 +39,7 @@ const STEPS = ["Eligibility", "Your info", "Letter of Intent"];
 export default function GetStartedWizard() {
   const [step, setStep] = useState(1); // 1..3, 4 = done
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false); // step-1 evaluation animation
   const [error, setError] = useState("");
 
   // step 1
@@ -47,38 +55,124 @@ export default function GetStartedWizard() {
 
   // step 3 (LOI)
   const [propertyAddress, setPropertyAddress] = useState("");
-  const [batteryCount, setBatteryCount] = useState("one");
-  const [rooftopSolar, setRooftopSolar] = useState("no");
   const [timeframe, setTimeframe] = useState("flexible");
-  const [reasons, setReasons] = useState<string[]>([]);
-  const [reasonOther, setReasonOther] = useState("");
   const [signedName, setSignedName] = useState("");
   const [agree, setAgree] = useState(false);
   const [loiNumber, setLoiNumber] = useState("");
 
-  const toggleReason = (r: string) =>
-    setReasons((prev) => (prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]));
+  // Google Places autocomplete for the step-1 address field.
+  const addrInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<unknown>(null);
+  const pickedRef = useRef<{ lat: number; lng: number; address: string } | null>(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const showAddrInput = step === 1 && elig?.eligibility.kind !== "INELIGIBLE";
 
-  async function checkEligibility(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  // Load the Maps JS (Places) once, if a key is configured. Without a key the
+  // field still works as a plain text input (manual submit → /api/lookup).
+  useEffect(() => {
+    if (!MAPS_KEY || typeof window === "undefined") return;
+    if (window.google?.maps?.places) {
+      setMapsLoaded(true);
+      return;
+    }
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      const t = setInterval(() => {
+        if (window.google?.maps?.places) {
+          setMapsLoaded(true);
+          clearInterval(t);
+        }
+      }, 120);
+      return () => clearInterval(t);
+    }
+    window.initCtbsMaps = () => setMapsLoaded(true);
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=places&callback=initCtbsMaps`;
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+    return () => {
+      window.initCtbsMaps = undefined;
+    };
+  }, []);
+
+  // Attach/detach the Autocomplete widget whenever the address field is shown.
+  useEffect(() => {
+    if (!mapsLoaded || !showAddrInput || !addrInputRef.current || autocompleteRef.current) return;
+    const ac = new window.google.maps.places.Autocomplete(addrInputRef.current, {
+      types: ["address"],
+      componentRestrictions: { country: "us" },
+      fields: ["formatted_address", "geometry"],
+    });
+    ac.addListener("place_changed", () => {
+      const place = ac.getPlace();
+      if (!place?.formatted_address) return;
+      setAddress(place.formatted_address);
+      const loc = place.geometry?.location;
+      pickedRef.current = loc
+        ? { lat: loc.lat(), lng: loc.lng(), address: place.formatted_address }
+        : null;
+    });
+    autocompleteRef.current = ac;
+    return () => {
+      if (autocompleteRef.current && window.google?.maps?.event) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+      autocompleteRef.current = null;
+    };
+  }, [mapsLoaded, showAddrInput]);
+
+  // Run the eligibility lookup behind a processing animation (min display time
+  // so the "evaluation" reads as deliberate, not a flash).
+  async function runCheck(addr: string, coords?: { lat: number; lng: number }) {
+    const value = addr.trim();
+    if (!value) return;
+    setChecking(true);
     setError("");
+    setElig(null);
     try {
-      const res = await apiFetch<LookupResult>("/api/lookup", {
-        method: "POST",
-        body: JSON.stringify({ address: address.trim() }),
-      });
+      const [res] = await Promise.all([
+        apiFetch<LookupResult>("/api/lookup", {
+          method: "POST",
+          body: JSON.stringify({ address: value, ...(coords ?? {}) }),
+        }),
+        new Promise((r) => setTimeout(r, 2200)),
+      ]);
       setElig(res);
       if (res.eligibility.kind !== "INELIGIBLE") {
-        setPropertyAddress(res.address || address.trim());
+        setPropertyAddress(res.address || value);
         setStep(2);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lookup failed");
     } finally {
-      setLoading(false);
+      setChecking(false);
     }
   }
+
+  function checkEligibility(e: React.FormEvent) {
+    e.preventDefault();
+    const p = pickedRef.current;
+    const coords = p && p.address === address.trim() ? { lat: p.lat, lng: p.lng } : undefined;
+    runCheck(address, coords);
+  }
+
+  // If we arrived from the landing address field (?address=...), start the
+  // evaluation immediately.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const a = q.get("address");
+    if (!a) return;
+    setAddress(a);
+    const lat = Number(q.get("lat"));
+    const lng = Number(q.get("lng"));
+    const coords =
+      q.get("lat") && q.get("lng") && !Number.isNaN(lat) && !Number.isNaN(lng)
+        ? { lat, lng }
+        : undefined;
+    if (coords) pickedRef.current = { ...coords, address: a };
+    runCheck(a, coords);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submitLead(e: React.FormEvent) {
     e.preventDefault();
@@ -118,11 +212,8 @@ export default function GetStartedWizard() {
           propertyAddress: propertyAddress.trim(),
           email: email.trim(),
           phone: phone.trim() || undefined,
-          batteryCount,
-          rooftopSolar,
+          batteryCount: "two", // default; final sizing happens at property evaluation
           timeframe,
-          reasons,
-          reasonOther: reasonOther.trim() || undefined,
           signedName: signedName.trim(),
           source: "get-started",
         }),
@@ -145,6 +236,11 @@ export default function GetStartedWizard() {
         .gs-in{font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid ${C.border};border-radius:6px;padding:12px 13px;outline:none;width:100%;box-sizing:border-box}
         .gs-in:focus{border-color:${C.brand};box-shadow:0 0 0 3px #e6eeea}
         .gs-lb{${mono2()};font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:${C.muted};display:block;margin-bottom:6px}
+        .pac-container{z-index:10050;border-radius:8px;border:1px solid ${C.border};box-shadow:0 12px 32px rgba(26,26,24,.16);font-family:'DM Sans',sans-serif;margin-top:4px}
+        .pac-item{padding:8px 12px;font-size:14px;cursor:pointer}
+        @keyframes gs-spin{to{transform:rotate(360deg)}}
+        @keyframes gs-bar{0%{left:-40%}100%{left:100%}}
+        @keyframes gs-fade{0%,100%{opacity:.35}50%{opacity:1}}
       `}</style>
 
       <header style={{ borderBottom: `1px solid ${C.border}`, padding: "16px 0" }}>
@@ -165,7 +261,12 @@ export default function GetStartedWizard() {
         )}
 
         {/* STEP 1 — eligibility */}
-        {step === 1 && (
+        {step === 1 && checking && (
+          <Panel eyebrow="Step 1 · Eligibility" title="Checking your address…">
+            <Evaluating address={address} />
+          </Panel>
+        )}
+        {step === 1 && !checking && (
           <Panel eyebrow="Step 1 · Eligibility" title="Is your Connecticut home eligible?">
             <p style={lead}>
               Enter your address. This program is Connecticut-only right now — we&apos;ll check your
@@ -185,9 +286,9 @@ export default function GetStartedWizard() {
             ) : (
               <form onSubmit={checkEligibility}>
                 <label className="gs-lb" htmlFor="addr">Service address (Connecticut)</label>
-                <input id="addr" className="gs-in" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="100 Main St, Hartford, CT 06103" autoFocus required />
-                <button type="submit" style={{ ...btnPrimary, marginTop: 18 }} disabled={loading || !address.trim()}>
-                  {loading ? "Checking…" : "Check eligibility →"}
+                <input ref={addrInputRef} id="addr" className="gs-in" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="100 Main St, Hartford, CT 06103" autoComplete="off" autoFocus required />
+                <button type="submit" style={{ ...btnPrimary, marginTop: 18 }} disabled={!address.trim()}>
+                  See if I qualify →
                 </button>
               </form>
             )}
@@ -237,22 +338,8 @@ export default function GetStartedWizard() {
               <label className="gs-lb">Property address</label>
               <input className="gs-in" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} required />
 
-              <div style={{ marginTop: 16 }}><span className="gs-lb">Estimated system</span>
-                <Choices name="battery" value={batteryCount} onChange={setBatteryCount} opts={[["one", "One battery"], ["two", "Two batteries"], ["three_plus", "Three or more"]]} />
-              </div>
-              <div style={{ marginTop: 16 }}><span className="gs-lb">Existing rooftop solar?</span>
-                <Choices name="solar" value={rooftopSolar} onChange={setRooftopSolar} opts={[["no", "No"], ["yes", "Yes"], ["planned", "Planned"]]} />
-              </div>
               <div style={{ marginTop: 16 }}><span className="gs-lb">Desired timeframe</span>
                 <Choices name="tf" value={timeframe} onChange={setTimeframe} opts={[["asap", "As soon as possible"], ["flexible", "Flexible"]]} />
-              </div>
-              <div style={{ marginTop: 16 }}><span className="gs-lb">Reasons for interest (all that apply)</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {([["backup", "Backup power"], ["cost", "Lower costs"], ["solar", "Pair with solar"], ["environmental", "Environmental"], ["other", "Other"]] as const).map(([v, l]) => (
-                    <Chip key={v} on={reasons.includes(v)} onClick={() => toggleReason(v)}>{l}</Chip>
-                  ))}
-                </div>
-                {reasons.includes("other") && <input className="gs-in" style={{ marginTop: 8 }} value={reasonOther} onChange={(e) => setReasonOther(e.target.value)} placeholder="Tell us more" />}
               </div>
 
               <div style={{ marginTop: 20, borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
@@ -307,6 +394,35 @@ function Stepper({ step }: { step: number }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function Evaluating({ address }: { address: string }) {
+  const messages = [
+    "Locating your address…",
+    "Matching your utility territory…",
+    "Confirming Connecticut program eligibility…",
+    "Preparing your result…",
+  ];
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => Math.min(i + 1, messages.length - 1)), 560);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div style={{ padding: "12px 0 8px" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 22 }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", border: `4px solid ${C.border}`, borderTopColor: C.brand, animation: "gs-spin .9s linear infinite" }} />
+      </div>
+      {address && (
+        <p style={{ ...mono, textAlign: "center", fontSize: 12, color: C.muted, margin: "0 0 6px", wordBreak: "break-word" }}>{address}</p>
+      )}
+      <p style={{ textAlign: "center", fontSize: 17, color: C.ink2, margin: "0 0 20px", minHeight: 24 }}>{messages[idx]}</p>
+      <div style={{ position: "relative", height: 6, background: C.panel, borderRadius: 999, overflow: "hidden", maxWidth: 360, margin: "0 auto" }}>
+        <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: C.brand, borderRadius: 999, animation: "gs-bar 1.1s ease-in-out infinite" }} />
+      </div>
     </div>
   );
 }

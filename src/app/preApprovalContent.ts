@@ -26,12 +26,12 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 
 <header style="background:#fafaf8;border-bottom:1px solid #e5e3dc;padding:20px 0">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-<a href="/" aria-label="CT Battery Solutions" style="display:inline-flex;align-items:center"><img src="/logo.png" alt="CT Battery Solutions" style="height:34px;width:auto;display:block"/></a>
+<a href="/" aria-label="CT Battery Solutions" style="display:inline-flex;align-items:center"><img src="/logo.png" alt="CT Battery Solutions" style="height:clamp(48px,8vw,96px);width:auto;display:block"/></a>
 <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
 <a href="#basics" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The basics</a>
 <a href="#program" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The program</a>
 <a href="#company" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">Who we are</a>
-<a href="/get-started" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#1a1a1a;border-radius:4px;padding:9px 15px;text-decoration:none">Join the list</a>
+<a href="#join" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#1a1a1a;border-radius:4px;padding:9px 15px;text-decoration:none">Join the list</a>
 </div>
 </div>
 </header>
@@ -43,7 +43,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="padding-bottom:clamp(36px,4vw,52px)">
 <p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">Connecticut's Energy Storage Solutions program covers home battery storage through providers it approves. Join the list and we'll email you when enrollment opens where you live.</p>
 <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-<a href="/get-started" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">Join the list</a>
+<a href="#join" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">See if I qualify &rarr;</a>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No cost · No obligation</span>
 </div>
 </div>
@@ -289,7 +289,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="display:flex;gap:10px;align-items:baseline;font-size:15.5px;color:#3a3a37"><span style="color:#2f5d4e;font-weight:700">✓</span><span>We'd rather have a short honest list than a long one.</span></div>
 </div>
 </div>
-<div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(24px,3vw,32px)"><p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:#3a3a37">It starts with your address — we only serve Connecticut right now, so we check eligibility first. About a minute, no obligation.</p><a href="/get-started" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">Check your address &rarr;</a></div>
+<div id="ctbs-address-search"></div>
 </div>
 </section>
 
@@ -340,7 +340,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <a href="#basics" style="color:#6b6b66;text-decoration:none">The basics</a>
 <a href="#program" style="color:#6b6b66;text-decoration:none">The program</a>
 <a href="#company" style="color:#6b6b66;text-decoration:none">Who we are</a>
-<a href="/get-started" style="color:#6b6b66;text-decoration:none">Join the list</a>
+<a href="#join" style="color:#6b6b66;text-decoration:none">Join the list</a>
 </div>
 </div>
 <p style="margin:24px 0 0;max-width:96ch;font-size:13.5px;line-height:1.75;color:#6b6b66;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. It is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and does not currently install, own, or operate battery energy storage systems. Eligibility, incentives, equipment, and timelines described here are general and illustrative; actual terms depend on final program approval, equipment selection, site-specific engineering, and Connecticut Green Bank enrollment. Nothing on this site is an offer to contract. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc. and have not endorsed it or this site. <button type="button" data-open-legal="1" style="font:inherit;color:#234a3e;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Full legal notice</button></p>
