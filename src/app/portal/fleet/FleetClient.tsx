@@ -27,8 +27,8 @@ type System = {
 };
 type Fleet = { stats: Kpi[]; systems: System[] };
 
-// Vivid marker colors that read on a dark basemap.
-const MARKER: Record<string, string> = { ONLINE: "#34d17a", OFFLINE: "#f5a623", FAULT: "#ff5a4d" };
+// Marker colors tuned for the light-gray basemap.
+const MARKER: Record<string, string> = { ONLINE: "#16a34a", OFFLINE: "#d97706", FAULT: "#dc2626" };
 const STATE_BG: Record<string, string> = { ONLINE: "var(--c-green-l)", FAULT: "var(--c-red-l)", OFFLINE: "var(--c-amber-l)" };
 const STATE_FG: Record<string, string> = { ONLINE: "var(--c-green)", FAULT: "var(--c-red)", OFFLINE: "var(--c-amber)" };
 
@@ -117,7 +117,7 @@ export default function FleetClient() {
         if (cancelled || !mapEl.current || mapObj.current) return;
         const map = L.map(mapEl.current, { zoomControl: true, scrollWheelZoom: true }).setView([41.6, -72.7], 8);
         mapObj.current = map;
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
           attribution: '&copy; <a href="https://openstreetmap.org">OSM</a> &copy; <a href="https://carto.com">CARTO</a>',
           subdomains: "abcd",
           maxZoom: 19,
@@ -188,9 +188,9 @@ export default function FleetClient() {
 
           {/* Real map */}
           <div style={{ position: "relative", marginTop: 20, borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
-            <div ref={mapEl} style={{ height: 480, width: "100%", background: "#1a1a1f" }} />
+            <div ref={mapEl} style={{ height: 480, width: "100%", background: "#e9e9e6" }} />
             {mapError && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#bbb", fontFamily: "var(--mono)", fontSize: 12, background: "#1a1a1f" }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)", fontFamily: "var(--mono)", fontSize: 12, background: "#e9e9e6" }}>
                 Map failed to load — see the table below.
               </div>
             )}
@@ -198,7 +198,7 @@ export default function FleetClient() {
             <div style={legend}>
               {(["ONLINE", "OFFLINE", "FAULT"] as const).map((s) => (
                 <span key={s} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ width: 9, height: 9, borderRadius: 999, background: MARKER[s], boxShadow: "0 0 0 1.5px #fff" }} />
+                  <span style={{ width: 9, height: 9, borderRadius: 999, background: MARKER[s], boxShadow: "0 0 0 1.5px rgba(0,0,0,.12)" }} />
                   {s[0] + s.slice(1).toLowerCase()} · {fleet.systems.filter((x) => x.state === s).length}
                 </span>
               ))}
@@ -254,7 +254,7 @@ export default function FleetClient() {
 }
 
 const demoNote: React.CSSProperties = { display: "inline-block", marginTop: 10, fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: ".04em", color: "var(--c-amber)", background: "var(--c-amber-l)", padding: "4px 9px", borderRadius: 4 };
-const legend: React.CSSProperties = { position: "absolute", top: 12, right: 12, zIndex: 500, display: "flex", flexDirection: "column", gap: 6, background: "rgba(20,20,24,.82)", color: "#e8e8e6", padding: "10px 12px", borderRadius: 8, fontFamily: "var(--mono)", fontSize: 10.5, backdropFilter: "blur(4px)" };
+const legend: React.CSSProperties = { position: "absolute", top: 12, right: 12, zIndex: 500, display: "flex", flexDirection: "column", gap: 6, background: "rgba(255,255,255,.92)", color: "var(--ink-2)", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,.08)", boxShadow: "0 2px 10px rgba(0,0,0,.08)", fontFamily: "var(--mono)", fontSize: 10.5, backdropFilter: "blur(4px)" };
 const panel: React.CSSProperties = { background: "#fff", border: "1px solid var(--rule-2)", borderRadius: 8, padding: "16px 18px" };
 const panelHead: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 12, flexWrap: "wrap" };
 const panelTitle: React.CSSProperties = { fontFamily: "var(--serif)", fontSize: 17 };
