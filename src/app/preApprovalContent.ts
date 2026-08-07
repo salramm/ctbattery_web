@@ -26,10 +26,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 
 <header style="background:#fafaf8;border-bottom:1px solid #e5e3dc;padding:20px 0">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-<div style="display:flex;align-items:center;gap:10px">
-<span style="flex:none;width:26px;height:26px;border-radius:6px;background:#2f5d4e;display:flex;align-items:center;justify-content:center"><span style="width:9px;height:14px;border-radius:1.5px;background:#fafaf8;position:relative" style-before="content:'';position:absolute;left:50%;transform:translateX(-50%);top:-3px;width:5px;height:3px;border-radius:1px 1px 0 0;background:#fafaf8"></span></span>
-<span style="font-family:'DM Serif Display',Georgia,serif;font-size:19px;letter-spacing:.005em">CT Battery Solutions</span>
-</div>
+<a href="/" aria-label="CT Battery Solutions" style="display:inline-flex;align-items:center"><img src="/logo.png" alt="CT Battery Solutions" style="height:34px;width:auto;display:block"/></a>
 <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
 <a href="#basics" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The basics</a>
 <a href="#program" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The program</a>
@@ -376,10 +373,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <footer style="padding:clamp(40px,5vw,60px) 0 52px">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <div style="display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:center;padding-bottom:24px;border-bottom:1px solid #e5e3dc">
-<div style="display:flex;align-items:center;gap:10px">
-<span style="flex:none;width:24px;height:24px;border-radius:6px;background:#6b6b66;display:flex;align-items:center;justify-content:center"><span style="width:8px;height:13px;border-radius:1.5px;background:#fafaf8;position:relative" style-before="content:'';position:absolute;left:50%;transform:translateX(-50%);top:-3px;width:4px;height:3px;border-radius:1px 1px 0 0;background:#fafaf8"></span></span>
-<span style="font-family:'DM Serif Display',Georgia,serif;font-size:17px;color:#3a3a37">CT Battery Solutions</span>
-</div>
+<img src="/logo.png" alt="CT Battery Solutions" style="height:28px;width:auto;display:block;opacity:.9"/>
 <div style="display:flex;gap:22px;flex-wrap:wrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px">
 <a href="#basics" style="color:#6b6b66;text-decoration:none">The basics</a>
 <a href="#program" style="color:#6b6b66;text-decoration:none">The program</a>

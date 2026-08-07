@@ -7,6 +7,7 @@ import LogoutButton from "./LogoutButton";
 const SECTIONS: { label: string; href: string }[] = [
   { label: "Overview", href: "/portal" },
   { label: "Applications", href: "/portal/applications" },
+  { label: "Leads", href: "/portal/leads" },
   { label: "Non-profits", href: "/portal/nonprofits" },
   { label: "Battery systems", href: "/portal/equipment" },
   { label: "Calculator", href: "/portal/calculator" },

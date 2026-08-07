@@ -8,10 +8,10 @@ export default function LogoutButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  function onClick() {
+  async function onClick() {
     if (loading) return;
     setLoading(true);
-    clearSession();
+    await clearSession();
     router.push("/login");
     router.refresh();
   }
