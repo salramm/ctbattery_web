@@ -1,8 +1,15 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { API_BASE } from "@/lib/api";
 import { getAuthToken } from "@/lib/auth";
+
+declare global {
+  interface Window {
+    L?: any;
+  }
+}
 
 type Kpi = { label: string; value: string; sub: string; tone?: string };
 type System = {
@@ -20,28 +27,54 @@ type System = {
 };
 type Fleet = { stats: Kpi[]; systems: System[] };
 
-// ── CT map projection ───────────────────────────────────────────────
-const LNG_MIN = -73.75, LNG_RANGE = 2.0, LAT_MAX = 42.1, LAT_RANGE = 1.15;
-const VW = 680, VH = 520;
-const px = (lng: number) => ((lng - LNG_MIN) / LNG_RANGE) * VW;
-const py = (lat: number) => ((LAT_MAX - lat) / LAT_RANGE) * VH;
-// Approximate Connecticut outline (clockwise from the NW corner).
-const CT_OUTLINE: [number, number][] = [
-  [-73.487, 42.05], [-71.799, 42.03], [-71.797, 41.727], [-71.789, 41.416], [-71.86, 41.335],
-  [-72.09, 41.30], [-72.34, 41.263], [-72.47, 41.27], [-72.62, 41.26], [-72.9, 41.246],
-  [-73.1, 41.16], [-73.28, 41.12], [-73.44, 41.045], [-73.657, 41.001], [-73.63, 41.1],
-  [-73.55, 41.22], [-73.51, 41.3], [-73.487, 42.05],
-];
-const CT_PATH = CT_OUTLINE.map(([lng, lat], i) => `${i ? "L" : "M"}${px(lng).toFixed(1)},${py(lat).toFixed(1)}`).join(" ") + " Z";
-
-const STATE_COLOR: Record<string, string> = { ONLINE: "var(--c-green)", FAULT: "var(--c-red)", OFFLINE: "var(--c-amber)" };
+// Vivid marker colors that read on a dark basemap.
+const MARKER: Record<string, string> = { ONLINE: "#34d17a", OFFLINE: "#f5a623", FAULT: "#ff5a4d" };
 const STATE_BG: Record<string, string> = { ONLINE: "var(--c-green-l)", FAULT: "var(--c-red-l)", OFFLINE: "var(--c-amber-l)" };
+const STATE_FG: Record<string, string> = { ONLINE: "var(--c-green)", FAULT: "var(--c-red)", OFFLINE: "var(--c-amber)" };
 
 function socColor(soc: number | null): string {
   if (soc == null) return "var(--ink-5)";
   if (soc >= 70) return "var(--c-green)";
   if (soc >= 40) return "var(--c-teal)";
   return "var(--c-red)";
+}
+
+// Load Leaflet (JS + CSS) from CDN once; resolve with window.L.
+function loadLeaflet(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (window.L) return resolve(window.L);
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+    const existing = document.getElementById("leaflet-js") as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", () => resolve(window.L));
+      existing.addEventListener("error", () => reject(new Error("map failed to load")));
+      if (window.L) resolve(window.L);
+      return;
+    }
+    const s = document.createElement("script");
+    s.id = "leaflet-js";
+    s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.async = true;
+    s.onload = () => resolve(window.L);
+    s.onerror = () => reject(new Error("map failed to load"));
+    document.head.appendChild(s);
+  });
+}
+
+function popupHtml(s: System): string {
+  const soc = s.soc == null ? "—" : `${s.soc}%`;
+  return `<div style="font-family:var(--font-dm-sans),system-ui,sans-serif;min-width:150px">
+    <div style="font-weight:600;font-size:13.5px;color:#1c1c1a">${s.customer}</div>
+    <div style="font-size:11px;color:#8a8a82;margin:2px 0 6px">${s.town}, CT · ${s.hw}</div>
+    <div style="font-family:ui-monospace,monospace;font-size:11px;color:#55554f">SOC ${soc} · ${s.mode}</div>
+    <div style="font-family:ui-monospace,monospace;font-size:11px;font-weight:600;color:${MARKER[s.state]};margin-top:3px">${s.status}</div>
+  </div>`;
 }
 
 async function opsFetch<T>(path: string): Promise<T> {
@@ -55,7 +88,12 @@ async function opsFetch<T>(path: string): Promise<T> {
 export default function FleetClient() {
   const [fleet, setFleet] = useState<Fleet | null>(null);
   const [error, setError] = useState("");
+  const [mapError, setMapError] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
+
+  const mapEl = useRef<HTMLDivElement>(null);
+  const mapObj = useRef<any>(null);
+  const markers = useRef<Record<string, any>>({});
 
   const load = useCallback(async () => {
     setError("");
@@ -70,16 +108,67 @@ export default function FleetClient() {
     load();
   }, [load]);
 
+  // Build the Leaflet map once fleet data is in.
+  useEffect(() => {
+    if (!fleet) return;
+    let cancelled = false;
+    loadLeaflet()
+      .then((L) => {
+        if (cancelled || !mapEl.current || mapObj.current) return;
+        const map = L.map(mapEl.current, { zoomControl: true, scrollWheelZoom: true }).setView([41.6, -72.7], 8);
+        mapObj.current = map;
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://openstreetmap.org">OSM</a> &copy; <a href="https://carto.com">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 19,
+        }).addTo(map);
+        const pts: [number, number][] = [];
+        fleet.systems.forEach((s) => {
+          if (s.lat == null || s.lng == null) return;
+          const m = L.circleMarker([s.lat, s.lng], {
+            radius: 8,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: MARKER[s.state] ?? "#34d17a",
+            fillOpacity: 0.95,
+          }).addTo(map);
+          m.bindPopup(popupHtml(s));
+          m.on("mouseover", () => setHover(s.projectId));
+          m.on("mouseout", () => setHover(null));
+          markers.current[s.projectId] = m;
+          pts.push([s.lat, s.lng]);
+        });
+        if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 11 });
+        setTimeout(() => map.invalidateSize(), 120);
+      })
+      .catch(() => setMapError(true));
+    return () => {
+      cancelled = true;
+      if (mapObj.current) {
+        mapObj.current.remove();
+        mapObj.current = null;
+        markers.current = {};
+      }
+    };
+  }, [fleet]);
+
+  // Sync table-row hover → open the marker popup.
+  useEffect(() => {
+    if (!hover) return;
+    const m = markers.current[hover];
+    if (m && mapObj.current) m.openPopup();
+  }, [hover]);
+
   return (
     <>
       <div className="page-head">
         <p className="eyebrow">Assets · Fleet</p>
         <h1>Fleet monitoring.</h1>
         <p className="lead">
-          Live status of every commissioned system across Connecticut — state of charge, operating mode, and
-          open faults. Click a marker to highlight its row.
+          Live status of every commissioned system across Connecticut — state of charge, operating mode, and open
+          faults. Pan the map or hover a row to locate a system.
         </p>
-        <span style={demoNote}>✳ Demo purposes — sample telemetry &amp; schematic map</span>
+        <span style={demoNote}>✳ Demo purposes — sample telemetry</span>
       </div>
 
       {error && <p style={{ color: "var(--c-red)", fontFamily: "var(--mono)", fontSize: 13 }}>{error}</p>}
@@ -97,57 +186,22 @@ export default function FleetClient() {
             ))}
           </div>
 
-          <div style={mapWrap}>
-            {/* Map */}
-            <div style={panel}>
-              <div style={panelHead}>
-                <span style={panelTitle}>Fleet map — Connecticut</span>
-                <div style={{ display: "flex", gap: 14 }}>
-                  {(["ONLINE", "OFFLINE", "FAULT"] as const).map((s) => (
-                    <span key={s} style={legendItem}>
-                      <span style={{ width: 9, height: 9, borderRadius: 999, background: STATE_COLOR[s] }} />
-                      {s[0] + s.slice(1).toLowerCase()}
-                    </span>
-                  ))}
-                </div>
+          {/* Real map */}
+          <div style={{ position: "relative", marginTop: 20, borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
+            <div ref={mapEl} style={{ height: 480, width: "100%", background: "#1a1a1f" }} />
+            {mapError && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#bbb", fontFamily: "var(--mono)", fontSize: 12, background: "#1a1a1f" }}>
+                Map failed to load — see the table below.
               </div>
-              <svg viewBox={`0 0 ${VW} ${VH}`} style={{ width: "100%", height: "auto", display: "block" }} role="img" aria-label="Connecticut fleet map">
-                <path d={CT_PATH} fill="var(--bg-soft)" stroke="var(--ink-4)" strokeWidth={1.5} strokeLinejoin="round" />
-                {fleet.systems.map((s) => {
-                  if (s.lat == null || s.lng == null) return null;
-                  const cx = px(s.lng), cy = py(s.lat);
-                  const on = hover === s.projectId;
-                  return (
-                    <g key={s.projectId} onMouseEnter={() => setHover(s.projectId)} onMouseLeave={() => setHover(null)} style={{ cursor: "pointer" }}>
-                      {on && <circle cx={cx} cy={cy} r={13} fill={STATE_COLOR[s.state]} opacity={0.18} />}
-                      <circle cx={cx} cy={cy} r={on ? 7 : 5.5} fill={STATE_COLOR[s.state]} stroke="#fff" strokeWidth={1.5} />
-                      <title>{`${s.customer} · ${s.town} · ${s.status}${s.soc != null ? ` · ${s.soc}%` : ""}`}</title>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Status rollup */}
-            <div style={panel}>
-              <div style={panelHead}>
-                <span style={panelTitle}>Status</span>
-              </div>
-              {(["ONLINE", "OFFLINE", "FAULT"] as const).map((st) => {
-                const n = fleet.systems.filter((s) => s.state === st).length;
-                return (
-                  <div key={st} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid var(--rule-2)" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                      <span style={{ width: 9, height: 9, borderRadius: 999, background: STATE_COLOR[st] }} />
-                      <span style={{ fontSize: 13.5, color: "var(--ink-2)" }}>{st[0] + st.slice(1).toLowerCase()}</span>
-                    </span>
-                    <span style={{ fontFamily: "var(--serif)", fontSize: 22, color: STATE_COLOR[st] }}>{n}</span>
-                  </div>
-                );
-              })}
-              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--ink-3)", marginTop: 14, lineHeight: 1.6 }}>
-                Markers plotted by service-address coordinates. Offline = no telemetry in 24h.
-              </div>
+            )}
+            {/* Legend overlay */}
+            <div style={legend}>
+              {(["ONLINE", "OFFLINE", "FAULT"] as const).map((s) => (
+                <span key={s} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: 999, background: MARKER[s], boxShadow: "0 0 0 1.5px #fff" }} />
+                  {s[0] + s.slice(1).toLowerCase()} · {fleet.systems.filter((x) => x.state === s).length}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -168,7 +222,7 @@ export default function FleetClient() {
                       key={s.projectId}
                       onMouseEnter={() => setHover(s.projectId)}
                       onMouseLeave={() => setHover(null)}
-                      style={{ borderTop: "1px solid var(--rule-2)", background: hover === s.projectId ? "var(--bg-soft)" : "transparent" }}
+                      style={{ borderTop: "1px solid var(--rule-2)", background: hover === s.projectId ? "var(--bg-soft)" : "transparent", cursor: "pointer" }}
                     >
                       <td style={td}>{s.customer}</td>
                       <td style={td}>{s.town}</td>
@@ -183,7 +237,7 @@ export default function FleetClient() {
                       </td>
                       <td style={{ ...td, fontFamily: "var(--mono)", fontSize: 11 }}>{s.mode === "SELF_CONSUMPTION" ? "SELF-CONSUME" : s.mode}</td>
                       <td style={td}>
-                        <span style={{ display: "inline-block", fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".04em", padding: "3px 8px", borderRadius: 5, background: STATE_BG[s.state], color: STATE_COLOR[s.state] }}>
+                        <span style={{ display: "inline-block", fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".04em", padding: "3px 8px", borderRadius: 5, background: STATE_BG[s.state], color: STATE_FG[s.state] }}>
                           {s.status}
                         </span>
                       </td>
@@ -200,11 +254,10 @@ export default function FleetClient() {
 }
 
 const demoNote: React.CSSProperties = { display: "inline-block", marginTop: 10, fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: ".04em", color: "var(--c-amber)", background: "var(--c-amber-l)", padding: "4px 9px", borderRadius: 4 };
-const mapWrap: React.CSSProperties = { display: "grid", gridTemplateColumns: "minmax(0,2.4fr) minmax(200px,1fr)", gap: 16, marginTop: 20, alignItems: "start" };
+const legend: React.CSSProperties = { position: "absolute", top: 12, right: 12, zIndex: 500, display: "flex", flexDirection: "column", gap: 6, background: "rgba(20,20,24,.82)", color: "#e8e8e6", padding: "10px 12px", borderRadius: 8, fontFamily: "var(--mono)", fontSize: 10.5, backdropFilter: "blur(4px)" };
 const panel: React.CSSProperties = { background: "#fff", border: "1px solid var(--rule-2)", borderRadius: 8, padding: "16px 18px" };
 const panelHead: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 12, flexWrap: "wrap" };
 const panelTitle: React.CSSProperties = { fontFamily: "var(--serif)", fontSize: 17 };
-const legendItem: React.CSSProperties = { display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--mono)", fontSize: 10, color: "var(--ink-3)" };
 const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse", fontSize: 13 };
 const th: React.CSSProperties = { textAlign: "left", padding: "8px 12px", fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", whiteSpace: "nowrap" };
 const td: React.CSSProperties = { padding: "10px 12px", verticalAlign: "middle", color: "var(--ink-2)" };
