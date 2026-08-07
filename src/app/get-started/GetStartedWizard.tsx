@@ -2,13 +2,7 @@
 
 import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { apiFetch } from "@/lib/api";
-
-const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-declare global {
-  // `google` is declared (as any) by AddressSearch's global augmentation.
-  interface Window { initCtbsMaps?: () => void }
-}
+import AddressAutocomplete, { type PickedAddress } from "@/components/AddressAutocomplete";
 
 const C = {
   brand: "#2f5d4e",
@@ -60,66 +54,9 @@ export default function GetStartedWizard() {
   const [agree, setAgree] = useState(false);
   const [loiNumber, setLoiNumber] = useState("");
 
-  // Google Places autocomplete for the step-1 address field.
-  const addrInputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<unknown>(null);
-  const pickedRef = useRef<{ lat: number; lng: number; address: string } | null>(null);
-  const [mapsLoaded, setMapsLoaded] = useState(false);
-  const showAddrInput = step === 1 && elig?.eligibility.kind !== "INELIGIBLE";
-
-  // Load the Maps JS (Places) once, if a key is configured. Without a key the
-  // field still works as a plain text input (manual submit → /api/lookup).
-  useEffect(() => {
-    if (!MAPS_KEY || typeof window === "undefined") return;
-    if (window.google?.maps?.places) {
-      setMapsLoaded(true);
-      return;
-    }
-    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-      const t = setInterval(() => {
-        if (window.google?.maps?.places) {
-          setMapsLoaded(true);
-          clearInterval(t);
-        }
-      }, 120);
-      return () => clearInterval(t);
-    }
-    window.initCtbsMaps = () => setMapsLoaded(true);
-    const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=places&callback=initCtbsMaps`;
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
-    return () => {
-      window.initCtbsMaps = undefined;
-    };
-  }, []);
-
-  // Attach/detach the Autocomplete widget whenever the address field is shown.
-  useEffect(() => {
-    if (!mapsLoaded || !showAddrInput || !addrInputRef.current || autocompleteRef.current) return;
-    const ac = new window.google.maps.places.Autocomplete(addrInputRef.current, {
-      types: ["address"],
-      componentRestrictions: { country: "us" },
-      fields: ["formatted_address", "geometry"],
-    });
-    ac.addListener("place_changed", () => {
-      const place = ac.getPlace();
-      if (!place?.formatted_address) return;
-      setAddress(place.formatted_address);
-      const loc = place.geometry?.location;
-      pickedRef.current = loc
-        ? { lat: loc.lat(), lng: loc.lng(), address: place.formatted_address }
-        : null;
-    });
-    autocompleteRef.current = ac;
-    return () => {
-      if (autocompleteRef.current && window.google?.maps?.event) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
-      autocompleteRef.current = null;
-    };
-  }, [mapsLoaded, showAddrInput]);
+  // Coords captured when the user picks an autocomplete suggestion (address →
+  // lat/lng); freeform text is geocoded server-side on submit.
+  const pickedRef = useRef<PickedAddress | null>(null);
 
   // Run the eligibility lookup behind a processing animation (min display time
   // so the "evaluation" reads as deliberate, not a flash).
@@ -246,7 +183,7 @@ export default function GetStartedWizard() {
       <header style={{ borderBottom: `1px solid ${C.border}`, padding: "16px 0" }}>
         <div style={wrap}>
           <a href="/" aria-label="CT Battery Solutions" style={{ display: "inline-flex" }}>
-            <img src="/logo.png" alt="CT Battery Solutions" style={{ height: 30, width: "auto", display: "block" }} />
+            <img src="/logo-2.png" alt="CT Battery Solutions" style={{ height: 30, width: "auto", display: "block" }} />
           </a>
         </div>
       </header>
@@ -286,7 +223,16 @@ export default function GetStartedWizard() {
             ) : (
               <form onSubmit={checkEligibility}>
                 <label className="gs-lb" htmlFor="addr">Service address (Connecticut)</label>
-                <input ref={addrInputRef} id="addr" className="gs-in" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="100 Main St, Hartford, CT 06103" autoComplete="off" autoFocus required />
+                <AddressAutocomplete
+                  id="addr"
+                  value={address}
+                  onChange={setAddress}
+                  onPick={(p) => (pickedRef.current = p)}
+                  placeholder="100 Main St, Hartford, CT 06103"
+                  ariaLabel="Service address"
+                  autoFocus
+                  inputClassName="gs-in"
+                />
                 <button type="submit" style={{ ...btnPrimary, marginTop: 18 }} disabled={!address.trim()}>
                   See if I qualify →
                 </button>
