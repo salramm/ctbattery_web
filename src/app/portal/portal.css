@@ -3,6 +3,27 @@
    Scoped under `.gsa`. Loaded via the portal layout.
    ───────────────────────────────────────────────────────── */
 
+/* ─── Design tokens (scoped to the portal) ────────────────
+   These back every var() used below and in the dashboard/fleet screens. */
+.gsa {
+  --bg: #faf8f3;
+  --bg-soft: #f0ede5;
+  --paper: #ffffff;
+  --ink: #1c1c1a;
+  --ink-2: #55554f;
+  --ink-3: #8a8a82;
+  --ink-4: #a9aba8;
+  --ink-5: #c4bfb8;
+  --rule: #e5e1d5;
+  --rule-2: #ece9e0;
+  --accent: #2f5d4e;
+  --accent-ink: #234a3e;
+  --accent-soft: #e6eeea;
+  --serif: var(--font-dm-serif), Georgia, serif;
+  --sans: var(--font-dm-sans), system-ui, sans-serif;
+  --mono: var(--font-dm-mono), ui-monospace, monospace;
+}
+
 .gsa.shell {
   display: grid;
   grid-template-columns: 240px 1fr;

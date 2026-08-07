@@ -5,7 +5,8 @@ import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 
 const SECTIONS: { label: string; href: string }[] = [
-  { label: "Overview", href: "/portal" },
+  { label: "Dashboard", href: "/portal" },
+  { label: "Fleet map", href: "/portal/fleet" },
   { label: "Applications", href: "/portal/applications" },
   { label: "Leads", href: "/portal/leads" },
   { label: "Letters of Intent", href: "/portal/loi" },
