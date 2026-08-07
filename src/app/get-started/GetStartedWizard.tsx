@@ -38,6 +38,7 @@ export default function GetStartedWizard() {
 
   // step 1
   const [address, setAddress] = useState("");
+  const [utility, setUtility] = useState("");
   const [elig, setElig] = useState<LookupResult | null>(null);
 
   // step 2 (lead)
@@ -93,8 +94,8 @@ export default function GetStartedWizard() {
     runCheck(address, coords);
   }
 
-  // If we arrived from the landing address field (?address=...), start the
-  // evaluation immediately.
+  // If we arrived from the landing address field (?address=...), prefill the
+  // address so the visitor just confirms their provider and runs the check.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const a = q.get("address");
@@ -102,13 +103,9 @@ export default function GetStartedWizard() {
     setAddress(a);
     const lat = Number(q.get("lat"));
     const lng = Number(q.get("lng"));
-    const coords =
-      q.get("lat") && q.get("lng") && !Number.isNaN(lat) && !Number.isNaN(lng)
-        ? { lat, lng }
-        : undefined;
-    if (coords) pickedRef.current = { ...coords, address: a };
-    runCheck(a, coords);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (q.get("lat") && q.get("lng") && !Number.isNaN(lat) && !Number.isNaN(lng)) {
+      pickedRef.current = { lat, lng, address: a };
+    }
   }, []);
 
   async function submitLead(e: React.FormEvent) {
@@ -124,6 +121,7 @@ export default function GetStartedWizard() {
           email: email.trim(),
           phone: phone.trim() || undefined,
           tenure,
+          utility: utility || undefined,
           cityOrZip: elig?.eligibility.city || undefined,
           source: "get-started",
         }),
@@ -233,7 +231,15 @@ export default function GetStartedWizard() {
                   autoFocus
                   inputClassName="gs-in"
                 />
-                <button type="submit" style={{ ...btnPrimary, marginTop: 18 }} disabled={!address.trim()}>
+                <label className="gs-lb" htmlFor="util" style={{ marginTop: 16 }}>Your electric provider</label>
+                <select id="util" className="gs-in" value={utility} onChange={(e) => setUtility(e.target.value)} required>
+                  <option value="">Select your provider…</option>
+                  <option value="Eversource">Eversource (CL&amp;P)</option>
+                  <option value="United Illuminating">United Illuminating (UI)</option>
+                  <option value="Norwich Public Utilities">Norwich Public Utilities</option>
+                  <option value="Other / Not sure">Other / Not sure</option>
+                </select>
+                <button type="submit" style={{ ...btnPrimary, marginTop: 18 }} disabled={!address.trim() || !utility}>
                   See if I qualify →
                 </button>
               </form>

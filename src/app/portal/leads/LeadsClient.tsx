@@ -12,6 +12,7 @@ type Lead = {
   cityOrZip: string | null;
   phone: string | null;
   tenure: string | null;
+  utility: string | null;
   source: string | null;
   createdAt: string;
 };
@@ -75,7 +76,7 @@ export default function LeadsClient() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ textAlign: "left", background: "#fafafa" }}>
-              {["Received", "Name", "Email", "City / ZIP", "Phone", "Type"].map((h) => (
+              {["Received", "Name", "Email", "City / ZIP", "Phone", "Type", "Provider"].map((h) => (
                 <th key={h} style={th}>
                   {h}
                 </th>
@@ -91,11 +92,12 @@ export default function LeadsClient() {
                 <td style={td}>{r.cityOrZip ?? "—"}</td>
                 <td style={td}>{r.phone ?? "—"}</td>
                 <td style={td}>{r.tenure ?? "—"}</td>
+                <td style={td}>{r.utility ?? "—"}</td>
               </tr>
             ))}
             {rows.length === 0 && !loading && (
               <tr>
-                <td style={{ ...td, color: "#999" }} colSpan={6}>
+                <td style={{ ...td, color: "#999" }} colSpan={7}>
                   No sign-ups yet.
                 </td>
               </tr>
