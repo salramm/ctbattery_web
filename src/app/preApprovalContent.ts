@@ -31,7 +31,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <a href="#basics" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The basics</a>
 <a href="#program" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The program</a>
 <a href="#company" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">Who we are</a>
-<a href="#join" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#1a1a1a;border-radius:4px;padding:9px 15px;text-decoration:none">Join the list</a>
+<a href="/get-started" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#1a1a1a;border-radius:4px;padding:9px 15px;text-decoration:none">Join the list</a>
 </div>
 </div>
 </header>
@@ -43,7 +43,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="padding-bottom:clamp(36px,4vw,52px)">
 <p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">Connecticut's Energy Storage Solutions program covers home battery storage through providers it approves. Join the list and we'll email you when enrollment opens where you live.</p>
 <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-<a href="#join" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">Join the list</a>
+<a href="/get-started" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">Join the list</a>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No cost · No obligation</span>
 </div>
 </div>
@@ -289,45 +289,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="display:flex;gap:10px;align-items:baseline;font-size:15.5px;color:#3a3a37"><span style="color:#2f5d4e;font-weight:700">✓</span><span>We'd rather have a short honest list than a long one.</span></div>
 </div>
 </div>
-<form style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(24px,3vw,32px);display:flex;flex-direction:column;gap:17px">
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px">
-<label style="display:flex;flex-direction:column;gap:7px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">First name</span>
-<input type="text" name="first" autoComplete="given-name" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:12px 13px;outline:none;min-width:0" style-focus="border-color:#2f5d4e;box-shadow:0 0 0 3px #e6eeea">
-</label>
-<label style="display:flex;flex-direction:column;gap:7px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">Last name</span>
-<input type="text" name="last" autoComplete="family-name" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:12px 13px;outline:none;min-width:0" style-focus="border-color:#2f5d4e;box-shadow:0 0 0 3px #e6eeea">
-</label>
-</div>
-<label style="display:flex;flex-direction:column;gap:7px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">Email <span style="color:#2f5d4e">· required</span></span>
-<input type="email" name="email" required="" autoComplete="email" placeholder="you@example.com" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:12px 13px;outline:none;min-width:0" style-focus="border-color:#2f5d4e;box-shadow:0 0 0 3px #e6eeea">
-</label>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px">
-<label style="display:flex;flex-direction:column;gap:7px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">City or ZIP</span>
-<input type="text" name="city" autoComplete="postal-code" placeholder="Hartford or 06103" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:12px 13px;outline:none;min-width:0" style-focus="border-color:#2f5d4e;box-shadow:0 0 0 3px #e6eeea">
-</label>
-<label style="display:flex;flex-direction:column;gap:7px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">Phone <span style="color:#6b6b66">· optional</span></span>
-<input type="tel" name="phone" autoComplete="tel" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:12px 13px;outline:none;min-width:0" style-focus="border-color:#2f5d4e;box-shadow:0 0 0 3px #e6eeea">
-</label>
-</div>
-<div style="display:flex;flex-direction:column;gap:9px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#6b6b66">I am a</span>
-<div style="display:flex;gap:9px;flex-wrap:wrap">
-<label style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:11px 14px;font-size:15.5px;cursor:pointer" style-hover="border-color:#2f5d4e"><input type="radio" name="tenure" value="homeowner" style="accent-color:#2f5d4e;width:16px;height:16px;margin:0">Homeowner</label>
-<label style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:11px 14px;font-size:15.5px;cursor:pointer" style-hover="border-color:#2f5d4e"><input type="radio" name="tenure" value="renter" style="accent-color:#2f5d4e;width:16px;height:16px;margin:0">Renter</label>
-<label style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #d8d6ce;border-radius:5px;padding:11px 14px;font-size:15.5px;cursor:pointer" style-hover="border-color:#2f5d4e"><input type="radio" name="tenure" value="other" style="accent-color:#2f5d4e;width:16px;height:16px;margin:0">Organization</label>
-</div>
-</div>
-<button type="submit" style="font-family:'DM Sans',sans-serif;font-size:16.5px;font-weight:500;color:#fff;background:#2f5d4e;border:none;border-radius:5px;padding:15px 20px;cursor:pointer;margin-top:3px" style-hover="background:#234a3e">Join the list</button>
-<p style="margin:0;font-size:14px;line-height:1.65;color:#6b6b66;text-wrap:pretty">Signing up adds you to our list only. It is not an application, an enrollment, or a contract, and it does not reserve incentive funds on your behalf. We'll email you if and when CT Battery Solutions is approved and enrollment opens in your area. No cost, ever, to join.</p>
-
-<p style="margin:0;background:#e6eeea;border-left:3px solid #2f5d4e;border-radius:0 6px 6px 0;padding:12px 15px;font-size:14.5px;line-height:1.6;color:#234a3e" id="dc-submit-msg">This form is a design preview and isn't connected yet. We'll be in touch once it's connected.</p>
-
-</form>
+<div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(24px,3vw,32px)"><p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:#3a3a37">It starts with your address — we only serve Connecticut right now, so we check eligibility first. About a minute, no obligation.</p><a href="/get-started" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">Check your address &rarr;</a></div>
 </div>
 </section>
 
@@ -378,7 +340,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <a href="#basics" style="color:#6b6b66;text-decoration:none">The basics</a>
 <a href="#program" style="color:#6b6b66;text-decoration:none">The program</a>
 <a href="#company" style="color:#6b6b66;text-decoration:none">Who we are</a>
-<a href="#join" style="color:#6b6b66;text-decoration:none">Join the list</a>
+<a href="/get-started" style="color:#6b6b66;text-decoration:none">Join the list</a>
 </div>
 </div>
 <p style="margin:24px 0 0;max-width:96ch;font-size:13.5px;line-height:1.75;color:#6b6b66;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. It is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and does not currently install, own, or operate battery energy storage systems. Eligibility, incentives, equipment, and timelines described here are general and illustrative; actual terms depend on final program approval, equipment selection, site-specific engineering, and Connecticut Green Bank enrollment. Nothing on this site is an offer to contract. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc. and have not endorsed it or this site. <button type="button" data-open-legal="1" style="font:inherit;color:#234a3e;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Full legal notice</button></p>
