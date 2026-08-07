@@ -26,7 +26,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 
 <header style="background:#fafaf8;border-bottom:1px solid #e5e3dc;padding:20px 0">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-<a href="/" aria-label="CT Battery Solutions" style="display:inline-flex;align-items:center"><img src="/logo.png" alt="CT Battery Solutions" style="height:clamp(48px,8vw,96px);width:auto;display:block"/></a>
+<a href="/" aria-label="CT Battery Solutions" style="display:inline-flex;align-items:center"><img src="/logo.png" alt="CT Battery Solutions" style="height:clamp(29px,4.8vw,58px);width:auto;display:block"/></a>
 <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
 <a href="#basics" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The basics</a>
 <a href="#program" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66;text-decoration:none;padding:12px 0">The program</a>
