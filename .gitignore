@@ -19,3 +19,7 @@ next-env.d.ts
 .DS_Store
 .vercel
 *.log
+
+# Design source + AI/reference drop-ins (kept out of git for now)
+Battery project pre-approval landing/
+_reference/
