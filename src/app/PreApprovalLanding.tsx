@@ -19,7 +19,16 @@ export default function PreApprovalLanding() {
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-    setHeroMount(el.querySelector<HTMLElement>("#ctbs-hero-search"));
+    // A fresh load of "/" should start at the top; a leftover #join hash (from a
+    // prior in-page nav click) otherwise makes the browser jump down on reload.
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      window.scrollTo(0, 0);
+    }
+    // Clear the hero's static fallback CTA before mounting the live field into it.
+    const hero = el.querySelector<HTMLElement>("#ctbs-hero-search");
+    if (hero) hero.innerHTML = "";
+    setHeroMount(hero);
     setSearchMount(el.querySelector<HTMLElement>("#ctbs-address-search"));
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
