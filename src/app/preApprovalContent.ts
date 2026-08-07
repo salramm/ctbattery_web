@@ -42,10 +42,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <h1 style="margin:0 0 28px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(38px,6.6vw,84px);line-height:1.02;letter-spacing:-.022em;max-width:20ch;text-wrap:pretty">Residential battery storage at <em style="font-style:italic;color:#2f5d4e">no cost to you.</em></h1>
 <div style="padding-bottom:clamp(36px,4vw,52px)">
 <p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">Connecticut's Energy Storage Solutions program covers home battery storage through providers it approves. Join the list and we'll email you when enrollment opens where you live.</p>
-<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-<a href="#join" style="display:inline-flex;align-items:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:16px 26px;border-radius:5px;text-decoration:none">See if I qualify &rarr;</a>
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No cost · No obligation</span>
-</div>
+<div id="ctbs-hero-search"></div>
 </div>
 <div style="display:flex;align-items:flex-end;gap:clamp(3px,.6vw,6px);height:clamp(72px,9vw,118px)">
 <div style="flex:1;height:22%;background:#e0e8e4;border-radius:2px 2px 0 0"></div>

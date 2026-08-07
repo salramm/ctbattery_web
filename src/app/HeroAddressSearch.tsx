@@ -9,7 +9,7 @@ import AddressAutocomplete, { type PickedAddress } from "@/components/AddressAut
  * address + coords if a suggestion was picked), which runs the eligibility
  * evaluation. Mounted into the static landing markup via a portal.
  */
-export default function HeroAddressSearch() {
+export default function HeroAddressSearch({ variant = "card" }: { variant?: "card" | "hero" }) {
   const [address, setAddress] = useState("");
   const pickedRef = useRef<PickedAddress | null>(null);
 
@@ -26,6 +26,38 @@ export default function HeroAddressSearch() {
     window.location.href = `/get-started/?${params.toString()}`;
   }
 
+  const field = (
+    <AddressAutocomplete
+      value={address}
+      onChange={setAddress}
+      onPick={(p) => (pickedRef.current = p)}
+      placeholder="100 Main St, Hartford, CT 06103"
+      ariaLabel="Service address"
+      inputStyle={inp}
+    />
+  );
+
+  // Hero: inline input + button, no card/intro (the hero copy already sets it up).
+  if (variant === "hero") {
+    return (
+      <form onSubmit={go} style={{ maxWidth: 560 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
+          <div style={{ flex: "1 1 260px", minWidth: 0 }}>{field}</div>
+          <button
+            type="submit"
+            disabled={!address.trim()}
+            style={{ ...btn, flex: "0 0 auto", opacity: address.trim() ? 1 : 0.55 }}
+          >
+            See if I qualify &rarr;
+          </button>
+        </div>
+        <p style={{ margin: "12px 0 0", fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontSize: 12, color: "#6b6b66" }}>
+          No cost · No obligation · Connecticut only
+        </p>
+      </form>
+    );
+  }
+
   return (
     <div style={card}>
       <p style={{ margin: "0 0 16px", fontSize: 16, lineHeight: 1.6, color: "#3a3a37" }}>
@@ -33,14 +65,7 @@ export default function HeroAddressSearch() {
         first. About a minute, no obligation.
       </p>
       <form onSubmit={go} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <AddressAutocomplete
-          value={address}
-          onChange={setAddress}
-          onPick={(p) => (pickedRef.current = p)}
-          placeholder="100 Main St, Hartford, CT 06103"
-          ariaLabel="Service address"
-          inputStyle={inp}
-        />
+        {field}
         <button type="submit" disabled={!address.trim()} style={{ ...btn, opacity: address.trim() ? 1 : 0.55 }}>
           See if I qualify &rarr;
         </button>

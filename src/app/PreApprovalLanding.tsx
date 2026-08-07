@@ -10,14 +10,16 @@ const FONTS =
 
 export default function PreApprovalLanding() {
   const [legalOpen, setLegalOpen] = useState(false);
+  const [heroMount, setHeroMount] = useState<HTMLElement | null>(null);
   const [searchMount, setSearchMount] = useState<HTMLElement | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
 
   // Wire the static (innerHTML) content: legal-modal triggers + locate the
-  // address-search mount point for the portal.
+  // address-search mount points for the portals.
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
+    setHeroMount(el.querySelector<HTMLElement>("#ctbs-hero-search"));
     setSearchMount(el.querySelector<HTMLElement>("#ctbs-address-search"));
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
@@ -54,7 +56,8 @@ export default function PreApprovalLanding() {
       <style dangerouslySetInnerHTML={{ __html: `${STYLES}\n#dc-submit-msg{display:none}` }} />
 
       <div ref={mainRef} dangerouslySetInnerHTML={{ __html: MAIN }} />
-      {searchMount && createPortal(<HeroAddressSearch />, searchMount)}
+      {heroMount && createPortal(<HeroAddressSearch variant="hero" />, heroMount)}
+      {searchMount && createPortal(<HeroAddressSearch variant="card" />, searchMount)}
 
       {legalOpen && (
         <div
