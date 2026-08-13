@@ -357,7 +357,7 @@ export default function EssClient() {
           ))}
         </div>
         <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
-          <div ref={mapEl} style={{ height: 460, width: "100%", background: "#e9e9e6" }} />
+          <div ref={mapEl} style={{ height: "70vh", minHeight: 640, width: "100%", background: "#e9e9e6" }} />
         </div>
       </div>
     </>
