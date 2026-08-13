@@ -43,6 +43,7 @@ export default function EssContractorsClient() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
+  const [f, setF] = useState({ state: "", city: "", property: "", service: "", battery: "", award: "" });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -63,11 +64,32 @@ export default function EssContractorsClient() {
     load();
   }, [load]);
 
+  const facets = useMemo(() => {
+    const uniq = (arr: (string | null)[]) =>
+      Array.from(new Set(arr.filter((v): v is string => !!v))).sort((a, b) => a.localeCompare(b));
+    return {
+      state: uniq(rows.map((c) => c.state)),
+      city: uniq(rows.map((c) => c.city)),
+      property: uniq(rows.flatMap((c) => c.propertyTypes)),
+      service: uniq(rows.flatMap((c) => c.services)),
+      battery: uniq(rows.flatMap((c) => c.batteryTechnologies)),
+    };
+  }, [rows]);
+
+  const activeFilters = Object.values(f).filter(Boolean).length + (q.trim() ? 1 : 0);
+
   const view = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const filtered = needle
-      ? rows.filter((c) => [c.name, c.city, c.state, ...c.services, ...c.batteryTechnologies].join(" ").toLowerCase().includes(needle))
-      : rows;
+    const filtered = rows.filter((c) => {
+      if (needle && ![c.name, c.city, c.state, ...c.services, ...c.batteryTechnologies].join(" ").toLowerCase().includes(needle)) return false;
+      if (f.state && c.state !== f.state) return false;
+      if (f.city && c.city !== f.city) return false;
+      if (f.property && !c.propertyTypes.includes(f.property)) return false;
+      if (f.service && !c.services.includes(f.service)) return false;
+      if (f.battery && !c.batteryTechnologies.includes(f.battery)) return false;
+      if (f.award && (f.award === "yes") !== c.awardWinner) return false;
+      return true;
+    });
     const sorted = [...filtered].sort((a, b) => {
       const x = value(a, sort.key);
       const y = value(b, sort.key);
@@ -75,7 +97,7 @@ export default function EssContractorsClient() {
       return sort.dir === "asc" ? r : -r;
     });
     return sorted;
-  }, [rows, q, sort]);
+  }, [rows, q, sort, f]);
 
   function toggleSort(key: SortKey) {
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "name" || key === "city" || key === "state" || key === "zip" ? "asc" : "desc" }));
@@ -99,6 +121,21 @@ export default function EssContractorsClient() {
         <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--ink-3)" }}>
           {loading ? "Loading…" : `${view.length} of ${rows.length}`}
         </span>
+        {activeFilters > 0 && (
+          <button onClick={() => { setF({ state: "", city: "", property: "", service: "", battery: "", award: "" }); setQ(""); }} style={clearBtn}>
+            Clear filters ({activeFilters})
+          </button>
+        )}
+      </div>
+
+      {/* Facet filters — filter by any field's values */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 10, marginBottom: 14 }}>
+        <Facet label="State" value={f.state} onChange={(v) => setF((s) => ({ ...s, state: v }))} options={facets.state} />
+        <Facet label="Town / city" value={f.city} onChange={(v) => setF((s) => ({ ...s, city: v }))} options={facets.city} />
+        <Facet label="Property type" value={f.property} onChange={(v) => setF((s) => ({ ...s, property: v }))} options={facets.property} />
+        <Facet label="Service" value={f.service} onChange={(v) => setF((s) => ({ ...s, service: v }))} options={facets.service} />
+        <Facet label="Battery technology" value={f.battery} onChange={(v) => setF((s) => ({ ...s, battery: v }))} options={facets.battery} />
+        <Facet label="Award" value={f.award} onChange={(v) => setF((s) => ({ ...s, award: v }))} options={["yes", "no"]} labels={{ yes: "Award winners", no: "Non-winners" }} />
       </div>
 
       {error && <p style={{ color: "var(--c-red)", fontFamily: "var(--mono)", fontSize: 13 }}>{error}</p>}
@@ -146,6 +183,25 @@ export default function EssContractorsClient() {
   );
 }
 
+function Facet({ label, value, onChange, options, labels }: { label: string; value: string; onChange: (v: string) => void; options: string[]; labels?: Record<string, string> }) {
+  return (
+    <label style={{ display: "block" }}>
+      <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "8px 10px", border: `1px solid ${value ? "var(--accent)" : "var(--rule)"}`, borderRadius: 6, background: value ? "var(--accent-soft)" : "#fff", color: "var(--ink)", outline: "none" }}
+      >
+        <option value="">All</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{labels?.[o] ?? o}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+const clearBtn: React.CSSProperties = { fontFamily: "var(--mono)", fontSize: 11, color: "var(--accent-ink)", background: "var(--accent-soft)", border: "1px solid var(--accent)", borderRadius: 6, padding: "6px 12px", cursor: "pointer" };
 const th: React.CSSProperties = { padding: "8px 12px", whiteSpace: "nowrap" };
 const td: React.CSSProperties = { padding: "10px 12px", verticalAlign: "middle", color: "var(--ink-2)" };
 const sortBtn: React.CSSProperties = { background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", padding: 0 };
