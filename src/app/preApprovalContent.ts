@@ -317,6 +317,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <a href="#basics" style="color:#6b6b66;text-decoration:none">The basics</a>
 <a href="#program" style="color:#6b6b66;text-decoration:none">The program</a>
 <a href="#join" style="color:#6b6b66;text-decoration:none">Join the list</a>
+<a href="mailto:info@ctbatterysolutions.com" style="color:#2f5d4e;text-decoration:none">info@ctbatterysolutions.com</a>
 </div>
 </div>
 <p style="margin:24px 0 0;max-width:96ch;font-size:13.5px;line-height:1.75;color:#6b6b66;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. It is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and does not currently install, own, or operate battery energy storage systems. Eligibility, incentives, equipment, and timelines described here are general and illustrative; actual terms depend on final program approval, equipment selection, site-specific engineering, and Connecticut Green Bank enrollment. Nothing on this site is an offer to contract. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc. and have not endorsed it or this site. <button type="button" data-open-legal="1" style="font:inherit;color:#234a3e;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Full legal notice</button></p>
