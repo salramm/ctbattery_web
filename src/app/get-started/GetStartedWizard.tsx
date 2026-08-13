@@ -81,11 +81,11 @@ export default function GetStartedWizard() {
         setPropertyAddress(res.address || value);
         setStep(2);
         // Non-blocking: check the enhanced ESS tier for a positive nudge.
-        apiFetch<{ categories?: { underserved: boolean } }>("/api/ess/qualify", {
+        apiFetch<{ tier?: string }>("/api/ess/qualify", {
           method: "POST",
           body: JSON.stringify({ address: value, ...(coords ?? {}) }),
         })
-          .then((e) => setEssEnhanced(!!e.categories?.underserved))
+          .then((e) => setEssEnhanced(!!e.tier && e.tier !== "STANDARD"))
           .catch(() => {});
       }
     } catch (err) {

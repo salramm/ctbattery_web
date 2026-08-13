@@ -21,13 +21,17 @@ type Qualify = {
   tier?: string;
   tierLabel?: string;
   reasons?: string[];
-  categories?: { inEjBlockGroup: boolean; inDistressedMuni: boolean; matchedMuni: string | null; inGracePeriod: boolean; underserved: boolean };
-  compensation?: { oneTimeSignupUsd: number; performanceUsdPerKwhYear: number; enhanced: boolean };
+  categories?: {
+    inEjBlockGroup: boolean; inDistressedMuni: boolean; matchedMuni: string | null; inGracePeriod: boolean; underserved: boolean;
+    inEnergyCommunity: boolean; inNmtcLowIncome: boolean; mfahQualifying?: boolean;
+    mfah?: { projectName: string | null; units: number | null; sources: string[]; city: string } | null;
+  };
+  compensation?: { enhanced: boolean; enrollmentPerKwh: number; gridEdgeEnrollmentPerKwh: number; gridEdge: string; performancePerKwYearMin: number; performancePerKwYearMax: number };
   itc?: { basePct: number; confirmedPct: number; potentialPct: number; adders: { key: string; label: string; pct: number; basis: string; applies: boolean | null }[] };
   message?: string;
 };
 
-type LayerMeta = { color: string; label: string; group: "ESS" | "ITC"; desc: string };
+type LayerMeta = { color: string; label: string; group: "ESS" | "ITC" | "MFAH"; desc: string; point?: boolean };
 const LAYER_META: Record<string, LayerMeta> = {
   "ej-block-groups": {
     color: "#7c3aed", label: "EJ Block Groups", group: "ESS",
@@ -45,8 +49,12 @@ const LAYER_META: Record<string, LayerMeta> = {
     color: "#0f6b6b", label: "NMTC Low-Income Tracts", group: "ITC",
     desc: "NMTC qualified low-income census tracts → §48(e) Cat 1, +10% ITC.",
   },
+  "mfah-properties": {
+    color: "#b8341f", label: "Affordable-housing (MFAH)", group: "MFAH", point: true,
+    desc: "LIHTC / Section 8 / public housing (5+ units) → ESS Low-Income tier + ITC Cat 3.",
+  },
 };
-const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders" } as const;
+const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing" } as const;
 
 function loadLeaflet(): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -148,9 +156,17 @@ export default function EssClient() {
       const res = await fetch(`${API_BASE}/api/ess/layers/${name}`);
       if (!res.ok) return;
       const gj = await res.json();
-      const c = LAYER_META[name]?.color ?? "#2f5d4e";
+      const meta = LAYER_META[name];
+      const c = meta?.color ?? "#2f5d4e";
       const layer = L.geoJSON(gj, {
         style: { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 },
+        pointToLayer: (_f: unknown, latlng: unknown) =>
+          L.circleMarker(latlng, { radius: 4, color: "#fff", weight: 1, fillColor: c, fillOpacity: 0.9 }),
+        onEachFeature: (f: any, lyr: any) => {
+          if (meta?.point && f.properties) {
+            lyr.bindPopup(`<b>${f.properties.name ?? ""}</b><br>${f.properties.units ?? "?"} units · ${f.properties.sources ?? ""}`);
+          }
+        },
       }).addTo(map);
       overlays.current[name] = layer;
     } catch {
@@ -253,7 +269,7 @@ export default function EssClient() {
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginBottom: 14 }}>
-          {(["ESS", "ITC"] as const).map((group) => (
+          {(["ESS", "ITC", "MFAH"] as const).map((group) => (
             <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
               <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
                 {GROUP_LABEL[group]}
@@ -306,12 +322,28 @@ function QualifyResult({ r }: { r: Qualify }) {
           {r.reasons.map((x) => <li key={x} style={{ marginBottom: 3 }}>{x}</li>)}
         </ul>
       )}
+      {r.categories?.mfah && (
+        <div style={{ marginTop: 10, fontSize: 12.5, color: "#7a2016", background: "#fbeae6", border: "1px solid #f0c4ba", borderRadius: 8, padding: "8px 11px" }}>
+          🏢 Affordable-housing match: <strong>{r.categories.mfah.projectName}</strong> · {r.categories.mfah.units ?? "?"} units · {r.categories.mfah.sources.join(", ")}
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12, marginTop: 14 }}>
         <div style={sub}>
           <div style={subH}>ESS compensation</div>
-          <KV k="One-time sign-up" v={`$${r.compensation?.oneTimeSignupUsd}`} />
-          <KV k="Performance (yearly)" v={`$${r.compensation?.performanceUsdPerKwhYear} / kWh·yr`} />
-          {r.compensation?.enhanced && <KV k="Tier" v="Enhanced (underserved)" />}
+          <KV k="Enrollment (one-time)" v={`$${r.compensation?.enrollmentPerKwh} / kWh`} />
+          <KV
+            k="Performance (10-yr)"
+            v={
+              r.compensation
+                ? r.compensation.performancePerKwYearMin === r.compensation.performancePerKwYearMax
+                  ? `$${r.compensation.performancePerKwYearMin} / kW·yr`
+                  : `$${r.compensation.performancePerKwYearMin}–${r.compensation.performancePerKwYearMax} / kW·yr`
+                : "—"
+            }
+          />
+          <div style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 4 }}>
+            Grid Edge: <span style={{ color: "var(--c-amber)" }}>unconfirmed</span> (would raise enrollment to ${r.compensation?.gridEdgeEnrollmentPerKwh}/kWh)
+          </div>
         </div>
         <div style={sub}>
           <div style={subH}>Federal ITC adder stack</div>
