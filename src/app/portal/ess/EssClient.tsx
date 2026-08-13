@@ -26,12 +26,12 @@ type Qualify = {
     inEnergyCommunity: boolean; inNmtcLowIncome: boolean; mfahQualifying?: boolean;
     mfah?: { projectName: string | null; units: number | null; sources: string[]; city: string } | null;
   };
-  compensation?: { enhanced: boolean; enrollmentPerKwh: number; gridEdgeEnrollmentPerKwh: number; gridEdge: string; performancePerKwYearMin: number; performancePerKwYearMax: number };
+  compensation?: { enhanced: boolean; enrollmentPerKwh: number; baseEnrollmentPerKwh?: number; gridEdgeEnrollmentPerKwh: number; gridEdge: string; gridEdgeCircuit?: string | null; performancePerKwYearMin: number; performancePerKwYearMax: number };
   itc?: { basePct: number; confirmedPct: number; potentialPct: number; adders: { key: string; label: string; pct: number; basis: string; applies: boolean | null }[] };
   message?: string;
 };
 
-type LayerMeta = { color: string; label: string; group: "ESS" | "ITC" | "MFAH"; desc: string; point?: boolean };
+type LayerMeta = { color: string; label: string; group: "ESS" | "ITC" | "MFAH" | "UTIL"; desc: string; point?: boolean; line?: boolean };
 const LAYER_META: Record<string, LayerMeta> = {
   "ej-block-groups": {
     color: "#7c3aed", label: "EJ Block Groups", group: "ESS",
@@ -53,8 +53,16 @@ const LAYER_META: Record<string, LayerMeta> = {
     color: "#b8341f", label: "Affordable-housing (MFAH)", group: "MFAH", point: true,
     desc: "LIHTC / Section 8 / public housing (5+ units) → ESS Low-Income tier + ITC Cat 3.",
   },
+  "ui-service-areas": {
+    color: "#0891b2", label: "UI service territory", group: "UTIL",
+    desc: "United Illuminating electric service territory (by town).",
+  },
+  "ui-grid-edge": {
+    color: "#dc2626", label: "UI Grid Edge circuits", group: "UTIL", line: true,
+    desc: "UI distribution circuits flagged Grid Edge → $130/kWh ESS enrollment when a site is on one.",
+  },
 };
-const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing" } as const;
+const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing", UTIL: "United Illuminating" } as const;
 
 function addCss(id: string, href: string) {
   if (document.getElementById(id)) return;
@@ -100,6 +108,7 @@ const POPUP_HIDE = new Set([
   "Shape_Length", "Shape_Area", "globalid", "GlobalID", "symbol", "label", "GEOIDFQ",
   "affgeoid_tract_2020", "affgeoid_cty_2020", "date_last_update", "date_record_added",
   "dataset_version", "TOWN_NO", "fipstate_2020", "fipcounty_2020", "fipscty_2020", "fiptract_2020",
+  "FID", "ID", "TOWN_CODE", "CIS_TOWN_C", "SHAPE_AREA", "SHAPE_LEN", "Shape__Length",
 ]);
 
 function prettyKey(k: string): string {
@@ -211,8 +220,12 @@ export default function EssClient() {
         cluster.addTo(map);
         overlays.current[name] = cluster;
       } else {
+        // Lines (grid-edge circuits) get no fill and a heavier stroke.
+        const style = meta?.line
+          ? { color: c, weight: 3, opacity: 0.9 }
+          : { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 };
         const layer = L.geoJSON(gj, {
-          style: { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 },
+          style,
           onEachFeature: (f: any, lyr: any) => lyr.bindPopup(popupHtml(title, f.properties), { maxWidth: 280 }),
         }).addTo(map);
         overlays.current[name] = layer;
@@ -317,7 +330,7 @@ export default function EssClient() {
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginBottom: 14 }}>
-          {(["ESS", "ITC", "MFAH"] as const).map((group) => (
+          {(["ESS", "ITC", "MFAH", "UTIL"] as const).map((group) => (
             <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
               <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
                 {GROUP_LABEL[group]}
@@ -390,7 +403,13 @@ function QualifyResult({ r }: { r: Qualify }) {
             }
           />
           <div style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 4 }}>
-            Grid Edge: <span style={{ color: "var(--c-amber)" }}>unconfirmed</span> (would raise enrollment to ${r.compensation?.gridEdgeEnrollmentPerKwh}/kWh)
+            {r.compensation?.gridEdge === "likely" ? (
+              <>Grid Edge: <span style={{ color: "var(--c-green)" }}>likely ✓</span>{r.compensation?.gridEdgeCircuit ? ` (UI circuit #${r.compensation.gridEdgeCircuit})` : ""} — enrollment ${r.compensation?.gridEdgeEnrollmentPerKwh}/kWh (verify with UI)</>
+            ) : r.compensation?.gridEdge === "no" ? (
+              <>Grid Edge: <span style={{ color: "var(--ink-3)" }}>not on a UI Grid Edge circuit</span> (would raise enrollment to ${r.compensation?.gridEdgeEnrollmentPerKwh}/kWh)</>
+            ) : (
+              <>Grid Edge: <span style={{ color: "var(--c-amber)" }}>unconfirmed</span> (outside UI territory; would raise enrollment to ${r.compensation?.gridEdgeEnrollmentPerKwh}/kWh)</>
+            )}
           </div>
         </div>
         <div style={sub}>
