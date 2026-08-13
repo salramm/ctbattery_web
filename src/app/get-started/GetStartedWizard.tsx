@@ -181,7 +181,7 @@ export default function GetStartedWizard() {
       <header style={{ borderBottom: `1px solid ${C.border}`, padding: "16px 0" }}>
         <div style={wrap}>
           <a href="/" aria-label="CT Battery Solutions" style={{ display: "inline-flex" }}>
-            <img src="/logo-2.png" alt="CT Battery Solutions" style={{ height: 30, width: "auto", display: "block" }} />
+            <img src="/logo-3.png" alt="CT Battery Solutions" style={{ height: 30, width: "auto", display: "block" }} />
           </a>
         </div>
       </header>
