@@ -22,12 +22,10 @@ export default function Sidebar({ user }: { user: string }) {
 
   return (
     <aside className="sidebar">
-      <Link className="brand" href="/portal">
-        <span className="mark" aria-hidden="true" />
-        <div>
-          <div className="name">CT Battery Solutions</div>
-          <div className="role">Management portal</div>
-        </div>
+      <Link className="brand" href="/portal" style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-3.png" alt="CT Battery Solutions" style={{ height: 30, width: "auto", maxWidth: "100%", display: "block" }} />
+        <div className="role">Management portal</div>
       </Link>
 
       <div style={{ flex: 1, overflowY: "auto" }}>
@@ -41,8 +39,8 @@ export default function Sidebar({ user }: { user: string }) {
         </nav>
       </div>
 
-      {/* Documentation — a single link at the bottom, opens a tabbed hub. */}
-      <nav aria-label="Documentation">
+      {/* Documentation — last link, pinned at the bottom right above the Signed-in divider. */}
+      <nav aria-label="Documentation" style={{ borderTop: "1px solid var(--rule)", paddingTop: 6 }}>
         <Link href="/portal/docs/nonprofits" className={pathname.startsWith("/portal/docs") ? "active" : undefined}>
           Documentation
         </Link>
