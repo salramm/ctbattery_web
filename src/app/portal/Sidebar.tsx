@@ -9,6 +9,7 @@ type Item = { label: string; href: string };
 const OPERATIONS: Item[] = [
   { label: "Dashboard", href: "/portal" },
   { label: "Fleet map", href: "/portal/fleet" },
+  { label: "ESS qualification", href: "/portal/ess" },
   { label: "Applications", href: "/portal/applications" },
   { label: "Leads", href: "/portal/leads" },
   { label: "Letters of Intent", href: "/portal/loi" },
