@@ -27,12 +27,26 @@ type Qualify = {
   message?: string;
 };
 
-const LAYER_STYLE: Record<string, { color: string; label: string }> = {
-  "ej-block-groups": { color: "#7c3aed", label: "EJ Block Groups" },
-  "distressed-municipalities": { color: "#d97706", label: "Distressed Municipalities" },
-  "energy-communities": { color: "#1d4e89", label: "Energy Communities (+10% ITC)" },
-  "nmtc-low-income": { color: "#0f6b6b", label: "NMTC Low-Income Tracts (+10% ITC)" },
+type LayerMeta = { color: string; label: string; group: "ESS" | "ITC"; desc: string };
+const LAYER_META: Record<string, LayerMeta> = {
+  "ej-block-groups": {
+    color: "#7c3aed", label: "EJ Block Groups", group: "ESS",
+    desc: "Environmental Justice block groups → enhanced ESS compensation tier.",
+  },
+  "distressed-municipalities": {
+    color: "#d97706", label: "Distressed Municipalities", group: "ESS",
+    desc: "State distressed (& grace-period) towns → enhanced ESS compensation tier.",
+  },
+  "energy-communities": {
+    color: "#1d4e89", label: "Energy Communities", group: "ITC",
+    desc: "IRA energy communities (coal-closure + fossil-fuel employment) → +10% ITC.",
+  },
+  "nmtc-low-income": {
+    color: "#0f6b6b", label: "NMTC Low-Income Tracts", group: "ITC",
+    desc: "NMTC qualified low-income census tracts → §48(e) Cat 1, +10% ITC.",
+  },
 };
+const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders" } as const;
 
 function loadLeaflet(): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -134,7 +148,7 @@ export default function EssClient() {
       const res = await fetch(`${API_BASE}/api/ess/layers/${name}`);
       if (!res.ok) return;
       const gj = await res.json();
-      const c = LAYER_STYLE[name]?.color ?? "#2f5d4e";
+      const c = LAYER_META[name]?.color ?? "#2f5d4e";
       const layer = L.geoJSON(gj, {
         style: { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 },
       }).addTo(map);
@@ -230,24 +244,40 @@ export default function EssClient() {
         {result && !result.located && <p style={{ color: "var(--ink-3)", marginTop: 12 }}>{result.message}</p>}
       </div>
 
-      {/* Map + layers */}
+      {/* Map + layers, grouped by what they qualify for */}
       <div style={{ ...panel, marginTop: 16 }}>
-        <div style={panelHead}>
-          <span style={panelTitle}>Underserved map</span>
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-            {status?.layers.map((l) => (
-              <label key={l.name} style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--mono)", fontSize: 11, color: l.loaded ? "var(--ink-2)" : "var(--ink-4)" }}>
-                <input
-                  type="checkbox"
-                  disabled={!l.loaded}
-                  checked={!!visible[l.name]}
-                  onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
-                />
-                <span style={{ width: 10, height: 10, borderRadius: 2, background: LAYER_STYLE[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3 }} />
-                {LAYER_STYLE[l.name]?.label ?? l.label} {l.loaded ? `(${l.features})` : "· not loaded"}
-              </label>
-            ))}
-          </div>
+        <div style={{ marginBottom: 14 }}>
+          <span style={panelTitle}>Qualification map</span>
+          <p style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "4px 0 0" }}>
+            Toggle layers to see coverage. <strong>ESS</strong> layers set the compensation tier; <strong>ITC</strong> layers each add a federal tax-credit adder.
+          </p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginBottom: 14 }}>
+          {(["ESS", "ITC"] as const).map((group) => (
+            <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
+                {GROUP_LABEL[group]}
+              </div>
+              {(status?.layers ?? []).filter((l) => LAYER_META[l.name]?.group === group).map((l) => (
+                <label key={l.name} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: l.loaded ? "pointer" : "default" }}>
+                  <input
+                    type="checkbox"
+                    disabled={!l.loaded}
+                    checked={!!visible[l.name]}
+                    onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
+                    style={{ marginTop: 3 }}
+                  />
+                  <span style={{ width: 11, height: 11, borderRadius: 3, background: LAYER_META[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3, marginTop: 3, flex: "none" }} />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: l.loaded ? "var(--ink)" : "var(--ink-4)" }}>
+                      {LAYER_META[l.name]?.label ?? l.label} {l.loaded ? <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--ink-3)", fontWeight: 400 }}>({l.features})</span> : "· not loaded"}
+                    </span>
+                    <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>{LAYER_META[l.name]?.desc}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          ))}
         </div>
         <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
           <div ref={mapEl} style={{ height: 460, width: "100%", background: "#e9e9e6" }} />
@@ -259,6 +289,10 @@ export default function EssClient() {
 
 function QualifyResult({ r }: { r: Qualify }) {
   const under = r.categories?.underserved;
+  const [domesticContent, setDomesticContent] = useState(false);
+  const dcPct = r.itc?.adders.find((a) => a.key === "domestic_content")?.pct ?? 10;
+  const confirmed = (r.itc?.confirmedPct ?? 0) + (domesticContent ? dcPct : 0);
+  const potential = r.itc?.potentialPct ?? confirmed;
   return (
     <div style={{ marginTop: 16, borderTop: "1px solid var(--rule-2)", paddingTop: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -282,14 +316,27 @@ function QualifyResult({ r }: { r: Qualify }) {
         <div style={sub}>
           <div style={subH}>Federal ITC adder stack</div>
           <KV k="Base ITC" v={`${r.itc?.basePct}%`} />
-          {r.itc?.adders.map((a) => (
-            <KV
-              key={a.key}
-              k={a.label}
-              v={a.applies === true ? `+${a.pct}% ✓` : a.applies === false ? "n/a" : `+${a.pct}% (review)`}
-            />
-          ))}
-          <KV k="Total" v={`${r.itc?.confirmedPct}%${r.itc && r.itc.potentialPct > r.itc.confirmedPct ? ` – ${r.itc.potentialPct}%` : ""}`} />
+          {r.itc?.adders.map((a) =>
+            a.key === "domestic_content" ? (
+              <div key={a.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "4px 0", fontSize: 13 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 7, color: "var(--ink-3)", cursor: "pointer" }}>
+                  <input type="checkbox" checked={domesticContent} onChange={(e) => setDomesticContent(e.target.checked)} />
+                  {a.label}
+                </label>
+                <span style={{ color: domesticContent ? "var(--c-green)" : "var(--ink-3)", fontWeight: 500 }}>
+                  {domesticContent ? `+${a.pct}% ✓` : `+${a.pct}% (toggle)`}
+                </span>
+              </div>
+            ) : (
+              <KV key={a.key} k={a.label} v={a.applies === true ? `+${a.pct}% ✓` : a.applies === false ? "n/a" : `+${a.pct}% (review)`} />
+            ),
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "8px 0 0", marginTop: 4, borderTop: "1px solid var(--rule-2)", fontSize: 14 }}>
+            <span style={{ color: "var(--ink-2)", fontWeight: 600 }}>Total ITC</span>
+            <span style={{ color: "var(--accent-ink)", fontWeight: 700 }}>
+              {confirmed}%{potential > confirmed ? ` – ${potential}%` : ""}
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -40,6 +40,7 @@ export default function GetStartedWizard() {
   const [address, setAddress] = useState("");
   const [utility, setUtility] = useState("");
   const [elig, setElig] = useState<LookupResult | null>(null);
+  const [essEnhanced, setEssEnhanced] = useState(false);
 
   // step 2 (lead)
   const [firstName, setFirstName] = useState("");
@@ -79,6 +80,13 @@ export default function GetStartedWizard() {
       if (res.eligibility.kind !== "INELIGIBLE") {
         setPropertyAddress(res.address || value);
         setStep(2);
+        // Non-blocking: check the enhanced ESS tier for a positive nudge.
+        apiFetch<{ categories?: { underserved: boolean } }>("/api/ess/qualify", {
+          method: "POST",
+          body: JSON.stringify({ address: value, ...(coords ?? {}) }),
+        })
+          .then((e) => setEssEnhanced(!!e.categories?.underserved))
+          .catch(() => {});
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lookup failed");
@@ -254,6 +262,11 @@ export default function GetStartedWizard() {
               {elig?.eligibility.kind === "PRIORITY" ? "Priority area" : "Eligible"} · {elig?.address}
               {elig?.utility ? ` · ${elig.utility.utility_name}` : ""}
             </div>
+            {essEnhanced && (
+              <div style={{ fontSize: 14, color: C.brandDark, background: "#e6eeea", border: "1px solid #bcd", borderRadius: 8, padding: "10px 13px", marginBottom: 14 }}>
+                ✓ Good news — your area qualifies for the program&apos;s <strong>enhanced compensation tier</strong>.
+              </div>
+            )}
             <p style={lead}>A few details so we can keep you posted and prepare your Letter of Intent.</p>
             <form onSubmit={submitLead}>
               <div style={row2}>

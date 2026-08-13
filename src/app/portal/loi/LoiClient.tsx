@@ -18,6 +18,13 @@ type Loi = {
   signedAt: string;
   source: string | null;
   createdAt: string;
+  essTier: string | null;
+  underserved: boolean | null;
+  energyCommunity: boolean | null;
+  nmtcLowIncome: boolean | null;
+  itcConfirmedPct: number | null;
+  itcPotentialPct: number | null;
+  lucrativeScore: number | null;
 };
 
 const LIMIT = 20;
@@ -95,7 +102,7 @@ export default function LoiClient() {
     <div style={{ padding: "8px 4px" }}>
       <h1 style={{ fontSize: 28, margin: 0 }}>Letters of Intent</h1>
       <p style={{ color: "#666", marginTop: 6 }}>
-        Non-binding LOIs signed through the get-started flow.
+        Non-binding LOIs signed through the get-started flow — <strong>prioritized by incentive value</strong> (ESS tier + ITC adders).
       </p>
 
       {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
@@ -110,7 +117,7 @@ export default function LoiClient() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ textAlign: "left", background: "#fafafa" }}>
-              {["Signed", "LOI #", "Signed by", "Property", "Email", "System", "PDF"].map((h) => (
+              {["Value", "ESS tier", "ITC", "Signed", "LOI #", "Signed by", "Property", "PDF"].map((h) => (
                 <th key={h} style={th}>
                   {h}
                 </th>
@@ -120,12 +127,26 @@ export default function LoiClient() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} style={{ borderTop: "1px solid #eee" }}>
+                <td style={td}><ValueBadge score={r.lucrativeScore} /></td>
+                <td style={td}>
+                  {r.essTier ? (
+                    <span style={{ fontFamily: "ui-monospace,monospace", fontSize: 11, padding: "2px 7px", borderRadius: 5, background: r.underserved ? "#ecfdf3" : "#f1f1ec", color: r.underserved ? "#0f6e56" : "#7a7a72" }}>
+                      {r.underserved ? "Underserved" : "Base"}
+                    </span>
+                  ) : "—"}
+                </td>
+                <td style={{ ...td, fontFamily: "ui-monospace,monospace" }}>
+                  {r.itcConfirmedPct != null ? `${r.itcConfirmedPct}%${r.itcPotentialPct && r.itcPotentialPct > r.itcConfirmedPct ? `–${r.itcPotentialPct}%` : ""}` : "—"}
+                  {(r.energyCommunity || r.nmtcLowIncome) && (
+                    <div style={{ fontSize: 10, color: "#888", marginTop: 2 }}>
+                      {[r.nmtcLowIncome && "NMTC", r.energyCommunity && "Energy Comm"].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
+                </td>
                 <td style={td}>{new Date(r.signedAt || r.createdAt).toLocaleDateString()}</td>
                 <td style={{ ...td, fontFamily: "ui-monospace,monospace", whiteSpace: "nowrap" }}>{r.loiNumber}</td>
                 <td style={td}>{r.signedName || r.siteOwnerName}</td>
                 <td style={td}>{r.propertyAddress}</td>
-                <td style={td}>{r.email}</td>
-                <td style={td}>{batteryLabel(r.batteryCount)}</td>
                 <td style={td}>
                   <button style={linkBtn} onClick={() => downloadPdf(r)} disabled={downloading === r.id}>
                     {downloading === r.id ? "…" : "Download"}
@@ -135,7 +156,7 @@ export default function LoiClient() {
             ))}
             {rows.length === 0 && !loading && (
               <tr>
-                <td style={{ ...td, color: "#999" }} colSpan={7}>
+                <td style={{ ...td, color: "#999" }} colSpan={8}>
                   No letters of intent yet.
                 </td>
               </tr>
@@ -165,12 +186,17 @@ export default function LoiClient() {
   );
 }
 
-function batteryLabel(v: string | null): string {
-  if (v === "one") return "1 battery";
-  if (v === "two") return "2 batteries";
-  if (v === "three_plus") return "3+ batteries";
-  return "—";
+function ValueBadge({ score }: { score: number | null }) {
+  if (score == null) return <span style={{ color: "#bbb" }}>—</span>;
+  const color = score >= 60 ? "#0f6e56" : score >= 45 ? "#9a6700" : "#7a7a72";
+  const bg = score >= 60 ? "#e1f5ee" : score >= 45 ? "#faeeda" : "#f1f1ec";
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 32, fontFamily: "ui-monospace,monospace", fontSize: 13, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: bg, color }}>
+      {score}
+    </span>
+  );
 }
+
 
 const th: React.CSSProperties = { padding: "10px 12px", fontWeight: 600, whiteSpace: "nowrap" };
 const td: React.CSSProperties = { padding: "10px 12px", verticalAlign: "top" };
