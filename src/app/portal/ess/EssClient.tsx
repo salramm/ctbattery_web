@@ -56,30 +56,65 @@ const LAYER_META: Record<string, LayerMeta> = {
 };
 const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing" } as const;
 
-function loadLeaflet(): Promise<any> {
+function addCss(id: string, href: string) {
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+function loadScript(id: string, src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (window.L) return resolve(window.L);
-    if (!document.getElementById("leaflet-css")) {
-      const link = document.createElement("link");
-      link.id = "leaflet-css";
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
-    const existing = document.getElementById("leaflet-js") as HTMLScriptElement | null;
+    const existing = document.getElementById(id) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener("load", () => resolve(window.L));
-      if (window.L) resolve(window.L);
+      if (existing.dataset.loaded) return resolve();
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error(`failed: ${src}`)));
       return;
     }
     const s = document.createElement("script");
-    s.id = "leaflet-js";
-    s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.id = id;
+    s.src = src;
     s.async = true;
-    s.onload = () => resolve(window.L);
-    s.onerror = () => reject(new Error("map failed to load"));
+    s.onload = () => { s.dataset.loaded = "1"; resolve(); };
+    s.onerror = () => reject(new Error(`failed: ${src}`));
     document.head.appendChild(s);
   });
+}
+
+// Load Leaflet core + the markercluster plugin (for MFAH clustering).
+function loadLeaflet(): Promise<any> {
+  addCss("leaflet-css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+  addCss("mcluster-css", "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css");
+  addCss("mcluster-css-def", "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css");
+  return loadScript("leaflet-js", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
+    .then(() => loadScript("mcluster-js", "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"))
+    .then(() => window.L);
+}
+
+// Feature attributes we don't surface in popups (ids, geometry math, internal).
+const POPUP_HIDE = new Set([
+  "OBJECTID", "objectid", "objectid_1", "SHAPE_Length", "SHAPE_Area", "SHAPE__Length", "SHAPE__Area",
+  "Shape_Length", "Shape_Area", "globalid", "GlobalID", "symbol", "label", "GEOIDFQ",
+  "affgeoid_tract_2020", "affgeoid_cty_2020", "date_last_update", "date_record_added",
+  "dataset_version", "TOWN_NO", "fipstate_2020", "fipcounty_2020", "fipscty_2020", "fiptract_2020",
+]);
+
+function prettyKey(k: string): string {
+  return k.replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function popupHtml(title: string, props: Record<string, any> | null): string {
+  const rows = Object.entries(props ?? {})
+    .filter(([k, v]) => v != null && v !== "" && !POPUP_HIDE.has(k))
+    .map(
+      ([k, v]) =>
+        `<div style="display:flex;gap:10px;justify-content:space-between;padding:1px 0"><span style="color:#8a8a82">${prettyKey(k)}</span><span style="color:#1c1c1a;font-weight:500;text-align:right">${String(v)}</span></div>`,
+    )
+    .join("");
+  return `<div style="font-family:system-ui,sans-serif;font-size:12.5px;min-width:190px"><div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#1c1c1a">${title}</div>${rows || '<span style="color:#8a8a82">No attributes</span>'}</div>`;
 }
 
 async function opsFetch<T>(path: string): Promise<T> {
@@ -158,17 +193,30 @@ export default function EssClient() {
       const gj = await res.json();
       const meta = LAYER_META[name];
       const c = meta?.color ?? "#2f5d4e";
-      const layer = L.geoJSON(gj, {
-        style: { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 },
-        pointToLayer: (_f: unknown, latlng: unknown) =>
-          L.circleMarker(latlng, { radius: 4, color: "#fff", weight: 1, fillColor: c, fillOpacity: 0.9 }),
-        onEachFeature: (f: any, lyr: any) => {
-          if (meta?.point && f.properties) {
-            lyr.bindPopup(`<b>${f.properties.name ?? ""}</b><br>${f.properties.units ?? "?"} units · ${f.properties.sources ?? ""}`);
-          }
-        },
-      }).addTo(map);
-      overlays.current[name] = layer;
+      const title = meta?.label ?? name;
+
+      if (meta?.point) {
+        // Cluster the MFAH points: counts when zoomed out, pins when zoomed in.
+        const cluster = L.markerClusterGroup
+          ? L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true })
+          : L.layerGroup();
+        (gj.features ?? []).forEach((f: any) => {
+          const g = f.geometry;
+          if (!g || g.type !== "Point") return;
+          const [lng, lat] = g.coordinates;
+          const m = L.circleMarker([lat, lng], { radius: 5, color: "#fff", weight: 1, fillColor: c, fillOpacity: 0.9 });
+          m.bindPopup(popupHtml(title, f.properties), { maxWidth: 280 });
+          cluster.addLayer(m);
+        });
+        cluster.addTo(map);
+        overlays.current[name] = cluster;
+      } else {
+        const layer = L.geoJSON(gj, {
+          style: { color: c, weight: 1, fillColor: c, fillOpacity: 0.15 },
+          onEachFeature: (f: any, lyr: any) => lyr.bindPopup(popupHtml(title, f.properties), { maxWidth: 280 }),
+        }).addTo(map);
+        overlays.current[name] = layer;
+      }
     } catch {
       /* ignore */
     }
