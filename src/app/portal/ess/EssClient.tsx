@@ -30,6 +30,8 @@ type Qualify = {
 const LAYER_STYLE: Record<string, { color: string; label: string }> = {
   "ej-block-groups": { color: "#7c3aed", label: "EJ Block Groups" },
   "distressed-municipalities": { color: "#d97706", label: "Distressed Municipalities" },
+  "energy-communities": { color: "#1d4e89", label: "Energy Communities (+10% ITC)" },
+  "nmtc-low-income": { color: "#0f6b6b", label: "NMTC Low-Income Tracts (+10% ITC)" },
 };
 
 function loadLeaflet(): Promise<any> {
@@ -194,7 +196,8 @@ export default function EssClient() {
         <p className="lead">
           Check an address against Connecticut Energy Storage Solutions compensation tiers and the federal
           ITC adder stack. Underserved geographies (EJ block groups, distressed municipalities, grace-period
-          towns) unlock the enhanced tier.
+          towns) unlock the enhanced ESS tier; IRA Energy Communities (coal-closure tracts + fossil-fuel
+          employment areas) add the +10% ITC energy-community adder.
         </p>
         {!anyLoaded && (
           <span style={demoNote}>
