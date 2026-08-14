@@ -198,6 +198,8 @@ export default function EssClient() {
   const [visible, setVisible] = useState<Record<string, boolean>>({});
   const [gridEdge, setGridEdge] = useState({ parcels: false, streets: false });
   const [capacityProp, setCapacityProp] = useState("val_load");
+  const [fullscreen, setFullscreen] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(true);
   const pickedRef = useRef<PickedAddress | null>(null);
 
   const mapEl = useRef<HTMLDivElement>(null);
@@ -406,6 +408,25 @@ export default function EssClient() {
 
   useEffect(() => { applyGePaint(); }, [capacityProp, applyGePaint]);
 
+  // Resize the map (and the GL overlay) after the container size changes.
+  useEffect(() => {
+    const map = mapObj.current;
+    if (!map) return;
+    const t = setTimeout(() => {
+      map.invalidateSize();
+      try { glMap.current?.resize(); } catch { /* not ready */ }
+    }, 180);
+    return () => clearTimeout(t);
+  }, [fullscreen]);
+
+  // Escape exits full screen.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
+
   async function qualify(e?: React.FormEvent) {
     e?.preventDefault();
     const v = address.trim();
@@ -445,6 +466,81 @@ export default function EssClient() {
   }
 
   const anyLoaded = status?.layers.some((l) => l.loaded);
+
+  // Layer toggles — rendered both above the map and inside the full-screen overlay.
+  const layerControls = (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16 }}>
+      {(["ESS", "ITC", "MFAH", "UTIL"] as const).map((group) => (
+        <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
+            {GROUP_LABEL[group]}
+          </div>
+          {(status?.layers ?? []).filter((l) => LAYER_META[l.name]?.group === group).map((l) => (
+            <label key={l.name} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: l.loaded ? "pointer" : "default" }}>
+              <input
+                type="checkbox"
+                disabled={!l.loaded}
+                checked={!!visible[l.name]}
+                onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
+                style={{ marginTop: 3 }}
+              />
+              <span style={{ width: 11, height: 11, borderRadius: 3, background: LAYER_META[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3, marginTop: 3, flex: "none" }} />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500, color: l.loaded ? "var(--ink)" : "var(--ink-4)" }}>
+                  {LAYER_META[l.name]?.label ?? l.label} {l.loaded ? <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--ink-3)", fontWeight: 400 }}>({l.features})</span> : "· not loaded"}
+                </span>
+                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>{LAYER_META[l.name]?.desc}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      ))}
+
+      {/* Eversource Grid Edge — client-side vector-tile overlay (not a backend layer). */}
+      <div style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
+          Eversource · Grid Edge (hosting capacity)
+        </div>
+        <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+          <input type="checkbox" checked={gridEdge.parcels} onChange={(e) => setGridEdge((g) => ({ ...g, parcels: e.target.checked }))} style={{ marginTop: 3 }} />
+          <span style={{ width: 11, height: 11, borderRadius: 3, background: "#FF6600", marginTop: 3, flex: "none" }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>Parcels</span>
+            <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Parcel-level hosting capacity (~961k). Overzoomed above z13.</span>
+          </span>
+        </label>
+        <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+          <input type="checkbox" checked={gridEdge.streets} onChange={(e) => setGridEdge((g) => ({ ...g, streets: e.target.checked }))} style={{ marginTop: 3 }} />
+          <span style={{ width: 11, height: 11, borderRadius: 3, background: "#009933", marginTop: 3, flex: "none" }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>MV network zones</span>
+            <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Medium-voltage circuit hosting-capacity zones.</span>
+          </span>
+        </label>
+
+        <div style={{ marginTop: 8 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Behavior / season</span>
+          <select
+            value={capacityProp}
+            onChange={(e) => setCapacityProp(e.target.value)}
+            style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "7px 9px", border: "1px solid var(--rule)", borderRadius: 6, background: "#fff", color: "var(--ink)", outline: "none" }}
+          >
+            {CAPACITY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+        </div>
+
+        {/* Color ramp legend (kW). */}
+        <div style={{ display: "flex", marginTop: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--rule-2)" }}>
+          {GE_RAMP.map((r) => (
+            <div key={r.min} title={`${r.label} kW`} style={{ flex: 1, height: 10, background: r.color }} />
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontFamily: "var(--mono)", fontSize: 8.5, color: "var(--ink-3)" }}>
+          <span>0</span><span>500</span><span>2k</span><span>5k+ kW</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -489,87 +585,50 @@ export default function EssClient() {
       </div>
 
       {/* Map + layers, grouped by what they qualify for */}
-      <div style={{ ...panel, marginTop: 16 }}>
-        <div style={{ marginBottom: 14 }}>
-          <span style={panelTitle}>Qualification map</span>
-          <p style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "4px 0 0" }}>
-            Toggle layers to see coverage. <strong>ESS</strong> layers set the compensation tier; <strong>ITC</strong> layers each add a federal tax-credit adder;
-            the <strong>Eversource Grid Edge</strong> overlay shades load / generator hosting capacity (kW) per parcel — zoom in and click a parcel for values.
-          </p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginBottom: 14 }}>
-          {(["ESS", "ITC", "MFAH", "UTIL"] as const).map((group) => (
-            <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
-              <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
-                {GROUP_LABEL[group]}
-              </div>
-              {(status?.layers ?? []).filter((l) => LAYER_META[l.name]?.group === group).map((l) => (
-                <label key={l.name} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: l.loaded ? "pointer" : "default" }}>
-                  <input
-                    type="checkbox"
-                    disabled={!l.loaded}
-                    checked={!!visible[l.name]}
-                    onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
-                    style={{ marginTop: 3 }}
-                  />
-                  <span style={{ width: 11, height: 11, borderRadius: 3, background: LAYER_META[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3, marginTop: 3, flex: "none" }} />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 13.5, fontWeight: 500, color: l.loaded ? "var(--ink)" : "var(--ink-4)" }}>
-                      {LAYER_META[l.name]?.label ?? l.label} {l.loaded ? <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--ink-3)", fontWeight: 400 }}>({l.features})</span> : "· not loaded"}
-                    </span>
-                    <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>{LAYER_META[l.name]?.desc}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          ))}
-
-          {/* Eversource Grid Edge — client-side vector-tile overlay (not a backend layer). */}
-          <div style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
-              Eversource · Grid Edge (hosting capacity)
-            </div>
-            <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
-              <input type="checkbox" checked={gridEdge.parcels} onChange={(e) => setGridEdge((g) => ({ ...g, parcels: e.target.checked }))} style={{ marginTop: 3 }} />
-              <span style={{ width: 11, height: 11, borderRadius: 3, background: "#FF6600", marginTop: 3, flex: "none" }} />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>Parcels</span>
-                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Parcel-level hosting capacity (~961k). Overzoomed above z13.</span>
-              </span>
-            </label>
-            <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
-              <input type="checkbox" checked={gridEdge.streets} onChange={(e) => setGridEdge((g) => ({ ...g, streets: e.target.checked }))} style={{ marginTop: 3 }} />
-              <span style={{ width: 11, height: 11, borderRadius: 3, background: "#009933", marginTop: 3, flex: "none" }} />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>MV network zones</span>
-                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Medium-voltage circuit hosting-capacity zones.</span>
-              </span>
-            </label>
-
-            <div style={{ marginTop: 8 }}>
-              <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Behavior / season</span>
-              <select
-                value={capacityProp}
-                onChange={(e) => setCapacityProp(e.target.value)}
-                style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "7px 9px", border: "1px solid var(--rule)", borderRadius: 6, background: "#fff", color: "var(--ink)", outline: "none" }}
-              >
-                {CAPACITY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-              </select>
-            </div>
-
-            {/* Color ramp legend (kW). */}
-            <div style={{ display: "flex", marginTop: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--rule-2)" }}>
-              {GE_RAMP.map((r) => (
-                <div key={r.min} title={`${r.label} kW`} style={{ flex: 1, height: 10, background: r.color }} />
-              ))}
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontFamily: "var(--mono)", fontSize: 8.5, color: "var(--ink-3)" }}>
-              <span>0</span><span>500</span><span>2k</span><span>5k+ kW</span>
-            </div>
+      <div style={{ ...panel, marginTop: 16, ...(fullscreen ? fsPanel : {}) }}>
+        {!fullscreen && (
+          <div style={{ marginBottom: 14 }}>
+            <span style={panelTitle}>Qualification map</span>
+            <p style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "4px 0 0" }}>
+              Toggle layers to see coverage. <strong>ESS</strong> layers set the compensation tier; <strong>ITC</strong> layers each add a federal tax-credit adder;
+              the <strong>Eversource Grid Edge</strong> overlay shades load / generator hosting capacity (kW) per parcel — zoom in and click a parcel for values.
+            </p>
           </div>
-        </div>
-        <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
-          <div ref={mapEl} style={{ height: "70vh", minHeight: 640, width: "100%", background: "#e9e9e6" }} />
+        )}
+
+        {!fullscreen && <div style={{ marginBottom: 14 }}>{layerControls}</div>}
+
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            ...(fullscreen
+              ? { flex: 1, minHeight: 0 }
+              : { borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }),
+          }}
+        >
+          <div ref={mapEl} style={{ height: fullscreen ? "100%" : "70vh", minHeight: fullscreen ? 0 : 640, width: "100%", background: "#e9e9e6" }} />
+
+          {/* Expand / collapse control. */}
+          <button
+            type="button"
+            onClick={() => setFullscreen((f) => !f)}
+            title={fullscreen ? "Exit full screen (Esc)" : "Full screen"}
+            style={fsBtn}
+          >
+            {fullscreen ? "⤡ Exit full screen" : "⤢ Full screen"}
+          </button>
+
+          {/* Full-screen layer control overlay. */}
+          {fullscreen && (
+            <div style={fsLayersWrap} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+              <button type="button" onClick={() => setLayersOpen((o) => !o)} style={fsLayersToggle}>
+                <span>Layers</span>
+                <span style={{ opacity: 0.6 }}>{layersOpen ? "▴" : "▾"}</span>
+              </button>
+              {layersOpen && <div style={fsLayersBody}>{layerControls}</div>}
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -672,3 +731,11 @@ const btn: React.CSSProperties = { background: "var(--accent)", color: "#fff", b
 const tierPill: React.CSSProperties = { fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".04em", padding: "5px 12px", borderRadius: 6 };
 const sub: React.CSSProperties = { background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" };
 const subH: React.CSSProperties = { fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 8 };
+
+// ---- Full-screen map styles ------------------------------------------------
+const fsPanel: React.CSSProperties = { position: "fixed", inset: 0, zIndex: 3000, margin: 0, padding: 12, borderRadius: 0, border: "none", display: "flex", flexDirection: "column", background: "#fff" };
+const fsBtn: React.CSSProperties = { position: "absolute", top: 10, right: 10, zIndex: 1200, background: "#fff", color: "var(--ink)", border: "1px solid var(--rule)", borderRadius: 6, padding: "7px 12px", fontSize: 12.5, fontWeight: 500, cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,.18)", fontFamily: "var(--sans)" };
+// Floating layer panel — top-left, clear of the Leaflet zoom control.
+const fsLayersWrap: React.CSSProperties = { position: "absolute", top: 10, left: 52, zIndex: 1200, width: 330, maxWidth: "calc(100% - 72px)", background: "rgba(255,255,255,.97)", border: "1px solid var(--rule)", borderRadius: 8, boxShadow: "0 2px 10px rgba(0,0,0,.18)", overflow: "hidden" };
+const fsLayersToggle: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", background: "var(--bg-soft)", border: "none", borderBottom: "1px solid var(--rule-2)", padding: "9px 12px", fontFamily: "var(--mono)", fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-2)", cursor: "pointer" };
+const fsLayersBody: React.CSSProperties = { padding: 12, maxHeight: "calc(100vh - 90px)", overflowY: "auto" };
