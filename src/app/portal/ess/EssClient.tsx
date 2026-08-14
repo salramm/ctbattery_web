@@ -8,6 +8,8 @@ import AddressAutocomplete, { type PickedAddress } from "@/components/AddressAut
 declare global {
   interface Window {
     L?: any;
+    maplibregl?: any;
+    pmtiles?: any;
   }
 }
 
@@ -64,6 +66,36 @@ const LAYER_META: Record<string, LayerMeta> = {
 };
 const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing", UTIL: "United Illuminating" } as const;
 
+// ---- Eversource Grid Edge (hosting capacity) vector-tile overlay -----------
+// Large (≈961k parcels) → served as a PMTiles vector-tile archive and rendered
+// via a MapLibre GL overlay bridged into Leaflet, additive to the layers above.
+const GRID_EDGE_PMTILES = "/tiles/grid_edge.pmtiles";
+// Capacity property that drives the color ramp (load vs seasonal generator).
+const CAPACITY_OPTIONS: { key: string; label: string }[] = [
+  { key: "val_load", label: "Load" },
+  { key: "val_gen_spring", label: "Gen · Spring" },
+  { key: "val_gen_summer", label: "Gen · Summer" },
+  { key: "val_gen_autumn", label: "Gen · Autumn" },
+  { key: "val_gen_winter", label: "Gen · Winter" },
+];
+// Hosting-capacity ramp (kW). #012 = #001122 (no capacity) → green (high headroom).
+const GE_RAMP: { min: number; color: string; label: string }[] = [
+  { min: 0, color: "#001122", label: "0" },
+  { min: 1, color: "#B34700", label: "1–50" },
+  { min: 50, color: "#D95700", label: "50–500" },
+  { min: 500, color: "#FF6600", label: "500–1k" },
+  { min: 1000, color: "#FFA061", label: "1k–2k" },
+  { min: 2000, color: "#FFCC00", label: "2k–3k" },
+  { min: 3000, color: "#009933", label: "3k–5k" },
+  { min: 5000, color: "#00541C", label: "5k+" },
+];
+// MapLibre 'step' color expression on the selected capacity property.
+function gridEdgeColorExpr(prop: string): any {
+  const stops: any[] = ["#001122"]; // input < first stop (≈0)
+  for (const r of GE_RAMP) if (r.min > 0) stops.push(r.min, r.color);
+  return ["step", ["to-number", ["get", prop], 0], ...stops];
+}
+
 function addCss(id: string, href: string) {
   if (document.getElementById(id)) return;
   const link = document.createElement("link");
@@ -102,6 +134,17 @@ function loadLeaflet(): Promise<any> {
     .then(() => window.L);
 }
 
+// Lazily load MapLibre GL + the Leaflet bridge + the pmtiles protocol. Only
+// pulled when a Grid Edge overlay is first enabled, so the base page stays light.
+function loadMapLibre(): Promise<any> {
+  if (window.maplibregl && window.L?.maplibreGL) return Promise.resolve(window.maplibregl);
+  addCss("maplibre-css", "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css");
+  return loadScript("maplibre-js", "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js")
+    .then(() => loadScript("pmtiles-js", "https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"))
+    .then(() => loadScript("maplibre-leaflet-js", "https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"))
+    .then(() => window.maplibregl);
+}
+
 // Feature attributes we don't surface in popups (ids, geometry math, internal).
 const POPUP_HIDE = new Set([
   "OBJECTID", "objectid", "objectid_1", "SHAPE_Length", "SHAPE_Area", "SHAPE__Length", "SHAPE__Area",
@@ -126,6 +169,19 @@ function popupHtml(title: string, props: Record<string, any> | null): string {
   return `<div style="font-family:system-ui,sans-serif;font-size:12.5px;min-width:190px"><div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#1c1c1a">${title}</div>${rows || '<span style="color:#8a8a82">No attributes</span>'}</div>`;
 }
 
+// Popup for a Grid Edge parcel / MV zone — id, size, and all capacity values,
+// with the currently-selected capacity emphasized.
+function gridEdgePopupHtml(props: Record<string, any>, selectedProp: string): string {
+  const num = (v: any) => (v == null || v === "" ? "—" : Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 }));
+  const rows = CAPACITY_OPTIONS.map((o) => {
+    const sel = o.key === selectedProp;
+    return `<div style="display:flex;justify-content:space-between;gap:14px;padding:1px 0;${sel ? "font-weight:700;color:#1c1c1a" : "color:#4a4a44"}"><span>${o.label}</span><span>${num(props[o.key])} kW</span></div>`;
+  }).join("");
+  const title = props.parcel_id != null ? `Parcel ${props.parcel_id}` : "MV network zone";
+  const size = props.size != null ? `<div style="color:#8a8a82;font-size:11.5px;margin:1px 0 6px">${num(props.size)} m²</div>` : "";
+  return `<div style="font-family:system-ui,sans-serif;font-size:12.5px;min-width:205px"><div style="font-weight:700;font-size:13px;color:#1c1c1a">${title}</div>${size}<div style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a82;margin:2px 0 3px">Hosting capacity (kW)</div>${rows}</div>`;
+}
+
 async function opsFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
   const json = await res.json();
@@ -140,12 +196,22 @@ export default function EssClient() {
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
   const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [gridEdge, setGridEdge] = useState({ parcels: false, streets: false });
+  const [capacityProp, setCapacityProp] = useState("val_load");
   const pickedRef = useRef<PickedAddress | null>(null);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapObj = useRef<any>(null);
   const overlays = useRef<Record<string, any>>({});
   const marker = useRef<any>(null);
+  const glLayer = useRef<any>(null); // maplibre-gl-leaflet bridge layer
+  const glMap = useRef<any>(null); // underlying maplibregl.Map
+  const glReady = useRef(false);
+  const gePopup = useRef<any>(null);
+  const gridEdgeRef = useRef(gridEdge);
+  const capacityPropRef = useRef(capacityProp);
+  gridEdgeRef.current = gridEdge;
+  capacityPropRef.current = capacityProp;
 
   useEffect(() => {
     opsFetch<Status>("/api/ess/status")
@@ -170,6 +236,25 @@ export default function EssClient() {
         subdomains: "abcd",
         maxZoom: 19,
       }).addTo(map);
+      // Grid Edge fills live in the GL canvas (no Leaflet features) — surface
+      // their attributes by querying the GL map at the clicked point.
+      map.on("click", (e: any) => {
+        const ge = gridEdgeRef.current;
+        if (!(ge.parcels || ge.streets)) return;
+        const m = glMap.current;
+        if (!m || !glReady.current) return;
+        const layers = [ge.parcels && "ge-parcels", ge.streets && "ge-streets"].filter(Boolean) as string[];
+        let feats: any[] = [];
+        try {
+          const pt = m.project([e.latlng.lng, e.latlng.lat]);
+          feats = m.queryRenderedFeatures([pt.x, pt.y], { layers });
+        } catch { /* ignore */ }
+        if (!feats.length) return;
+        gePopup.current = L.popup({ maxWidth: 280 })
+          .setLatLng(e.latlng)
+          .setContent(gridEdgePopupHtml(feats[0].properties || {}, capacityPropRef.current))
+          .openOn(map);
+      });
       setTimeout(() => map.invalidateSize(), 120);
     });
     return () => {
@@ -179,6 +264,9 @@ export default function EssClient() {
         mapObj.current = null;
         overlays.current = {};
         marker.current = null;
+        glLayer.current = null;
+        glMap.current = null;
+        glReady.current = false;
       }
     };
   }, []);
@@ -238,6 +326,85 @@ export default function EssClient() {
   useEffect(() => {
     Object.entries(visible).forEach(([name, show]) => syncLayer(name, show));
   }, [visible, status, syncLayer]);
+
+  // ---- Grid Edge (MapLibre GL vector-tile overlay) -------------------------
+  const applyGePaint = useCallback(() => {
+    const m = glMap.current;
+    if (!m || !glReady.current) return;
+    const expr = gridEdgeColorExpr(capacityPropRef.current);
+    try {
+      m.setPaintProperty("ge-parcels", "fill-color", expr);
+      m.setPaintProperty("ge-streets", "fill-color", expr);
+    } catch { /* style not ready */ }
+  }, []);
+
+  const applyGeVisibility = useCallback(() => {
+    const m = glMap.current;
+    if (!m || !glReady.current) return;
+    try {
+      m.setLayoutProperty("ge-parcels", "visibility", gridEdgeRef.current.parcels ? "visible" : "none");
+      m.setLayoutProperty("ge-streets", "visibility", gridEdgeRef.current.streets ? "visible" : "none");
+    } catch { /* style not ready */ }
+  }, []);
+
+  const ensureGridEdge = useCallback(async () => {
+    if (glLayer.current) return;
+    const map = mapObj.current;
+    if (!map) return;
+    try {
+      await loadMapLibre();
+      const maplibregl = window.maplibregl;
+      const pm = window.pmtiles;
+      if (!maplibregl || !window.L?.maplibreGL || !pm) throw new Error("maplibre/pmtiles unavailable");
+      if (!maplibregl.__pmtilesRegistered) {
+        const protocol = new pm.Protocol();
+        maplibregl.addProtocol("pmtiles", protocol.tile);
+        maplibregl.__pmtilesRegistered = true;
+      }
+      const url = `pmtiles://${window.location.origin}${GRID_EDGE_PMTILES}`;
+      const color = gridEdgeColorExpr(capacityPropRef.current);
+      const style = {
+        version: 8,
+        sources: { gridedge: { type: "vector", url } },
+        layers: [
+          { id: "ge-parcels", type: "fill", source: "gridedge", "source-layer": "parcels",
+            layout: { visibility: gridEdgeRef.current.parcels ? "visible" : "none" },
+            paint: { "fill-color": color, "fill-opacity": 0.55, "fill-outline-color": "rgba(20,20,20,0.15)" } },
+          { id: "ge-streets", type: "fill", source: "gridedge", "source-layer": "streets",
+            layout: { visibility: gridEdgeRef.current.streets ? "visible" : "none" },
+            paint: { "fill-color": color, "fill-opacity": 0.45, "fill-outline-color": "rgba(20,20,20,0.3)" } },
+        ],
+      };
+      // Dedicated pane: grid-edge fill above the basemap, below the
+      // qualification polygons (overlayPane 400) and markers (markerPane 600).
+      if (!map.getPane("gridedge")) {
+        map.createPane("gridedge");
+        map.getPane("gridedge").style.zIndex = 350;
+      }
+      const layer = window.L.maplibreGL({ style, pane: "gridedge", interactive: false });
+      layer.addTo(map);
+      glLayer.current = layer;
+      const m = layer.getMaplibreMap();
+      glMap.current = m;
+      m.on("load", () => {
+        glReady.current = true;
+        applyGeVisibility();
+        applyGePaint();
+      });
+      m.on("error", () => { /* tile/protocol errors are non-fatal to the page */ });
+    } catch {
+      glLayer.current = null;
+      glMap.current = null;
+    }
+  }, [applyGeVisibility, applyGePaint]);
+
+  useEffect(() => {
+    const anyOn = gridEdge.parcels || gridEdge.streets;
+    if (anyOn && !glLayer.current) ensureGridEdge();
+    else applyGeVisibility();
+  }, [gridEdge, ensureGridEdge, applyGeVisibility]);
+
+  useEffect(() => { applyGePaint(); }, [capacityProp, applyGePaint]);
 
   async function qualify(e?: React.FormEvent) {
     e?.preventDefault();
@@ -326,7 +493,8 @@ export default function EssClient() {
         <div style={{ marginBottom: 14 }}>
           <span style={panelTitle}>Qualification map</span>
           <p style={{ fontSize: 12.5, color: "var(--ink-3)", margin: "4px 0 0" }}>
-            Toggle layers to see coverage. <strong>ESS</strong> layers set the compensation tier; <strong>ITC</strong> layers each add a federal tax-credit adder.
+            Toggle layers to see coverage. <strong>ESS</strong> layers set the compensation tier; <strong>ITC</strong> layers each add a federal tax-credit adder;
+            the <strong>Eversource Grid Edge</strong> overlay shades load / generator hosting capacity (kW) per parcel — zoom in and click a parcel for values.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, marginBottom: 14 }}>
@@ -355,6 +523,50 @@ export default function EssClient() {
               ))}
             </div>
           ))}
+
+          {/* Eversource Grid Edge — client-side vector-tile overlay (not a backend layer). */}
+          <div style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
+              Eversource · Grid Edge (hosting capacity)
+            </div>
+            <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+              <input type="checkbox" checked={gridEdge.parcels} onChange={(e) => setGridEdge((g) => ({ ...g, parcels: e.target.checked }))} style={{ marginTop: 3 }} />
+              <span style={{ width: 11, height: 11, borderRadius: 3, background: "#FF6600", marginTop: 3, flex: "none" }} />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>Parcels</span>
+                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Parcel-level hosting capacity (~961k). Overzoomed above z13.</span>
+              </span>
+            </label>
+            <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+              <input type="checkbox" checked={gridEdge.streets} onChange={(e) => setGridEdge((g) => ({ ...g, streets: e.target.checked }))} style={{ marginTop: 3 }} />
+              <span style={{ width: 11, height: 11, borderRadius: 3, background: "#009933", marginTop: 3, flex: "none" }} />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>MV network zones</span>
+                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Medium-voltage circuit hosting-capacity zones.</span>
+              </span>
+            </label>
+
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Behavior / season</span>
+              <select
+                value={capacityProp}
+                onChange={(e) => setCapacityProp(e.target.value)}
+                style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "7px 9px", border: "1px solid var(--rule)", borderRadius: 6, background: "#fff", color: "var(--ink)", outline: "none" }}
+              >
+                {CAPACITY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </div>
+
+            {/* Color ramp legend (kW). */}
+            <div style={{ display: "flex", marginTop: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--rule-2)" }}>
+              {GE_RAMP.map((r) => (
+                <div key={r.min} title={`${r.label} kW`} style={{ flex: 1, height: 10, background: r.color }} />
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontFamily: "var(--mono)", fontSize: 8.5, color: "var(--ink-3)" }}>
+              <span>0</span><span>500</span><span>2k</span><span>5k+ kW</span>
+            </div>
+          </div>
         </div>
         <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--rule)" }}>
           <div ref={mapEl} style={{ height: "70vh", minHeight: 640, width: "100%", background: "#e9e9e6" }} />
