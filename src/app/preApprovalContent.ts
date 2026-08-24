@@ -16,8 +16,8 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 
 <div style="position:sticky;top:0;z-index:60;background:#FBF0DA;border-bottom:1px solid #E8CE85">
 <div style="max-width:1120px;margin:0 auto;padding:10px clamp(20px,5vw,56px);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-<span id="ctp-badge" style="font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#7A5B0A;background:#F6E3B8;border-radius:4px;padding:4px 9px;white-space:nowrap">Pending approval</span>
-<span id="ctp-banner-text" style="font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.45;color:#7A5B0A;flex:1 1 180px;min-width:0">Not an approved provider yet — we can't enroll or install today.</span>
+<span id="ctp-badge" style="font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#7A5B0A;background:#F6E3B8;border-radius:4px;padding:4px 9px;white-space:nowrap">Preparing to apply</span>
+<span id="ctp-banner-text" style="font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.45;color:#7A5B0A;flex:1 1 180px;min-width:0">Not an approved provider yet — we're preparing to apply and aren't currently enrolling or installing systems.</span>
 <button type="button" data-open-legal="1" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#7A5B0A;background:transparent;border:1px solid #D8B65E;border-radius:4px;padding:6px 11px;cursor:pointer;white-space:nowrap" style-hover="background:#F6E3B8">Read more</button>
 </div>
 </div>
@@ -38,10 +38,10 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <section style="padding:clamp(48px,7vw,88px) 0 0;border-bottom:1px solid #e5e3dc">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p style="margin:0 0 24px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">Connecticut Energy Storage Solutions</p>
-<h1 style="margin:0 0 28px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(38px,6.6vw,84px);line-height:1.02;letter-spacing:-.022em;max-width:20ch;text-wrap:pretty">Residential battery storage at <em style="font-style:italic;color:#2f5d4e">no cost to you.</em></h1>
+<h1 style="margin:0 0 28px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(38px,6.6vw,84px);line-height:1.02;letter-spacing:-.022em;max-width:20ch;text-wrap:pretty">Residential battery storage with <em style="font-style:italic;color:#2f5d4e">no upfront cost to you.</em></h1>
 <div style="padding-bottom:clamp(36px,4vw,52px)">
-<p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">Connecticut's Energy Storage Solutions program covers home battery storage through providers it approves. Join the list and we'll email you when enrollment opens where you live.</p>
-<form class="ctbs-hero-form" action="/get-started/" method="GET" style="max-width:560px;margin-top:4px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div class="ctbs-addr-wrap" style="flex:1 1 260px;min-width:0;position:relative"><input class="ctbs-addr-input" type="text" name="address" required autocomplete="off" placeholder="100 Main St, Hartford, CT 06103" aria-label="Service address" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:6px;padding:14px 15px;outline:none;width:100%;box-sizing:border-box"/></div><button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:15px 26px;border:none;border-radius:5px;cursor:pointer;white-space:nowrap">See if I qualify &rarr;</button></div><p style="margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No cost · No obligation · Connecticut only</p></form>
+<p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">We're developing a third-party ownership model that would allow qualifying Connecticut households to receive battery backup without purchasing the equipment themselves, supported in part by Connecticut's Energy Storage Solutions program. Join the list and we'll contact you if and when CT Battery Solutions is approved and begins enrolling projects in your area.</p>
+<form class="ctbs-hero-form" action="/get-started/" method="GET" style="max-width:560px;margin-top:4px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div class="ctbs-addr-wrap" style="flex:1 1 260px;min-width:0;position:relative"><input class="ctbs-addr-input" type="text" name="address" required autocomplete="off" placeholder="100 Main St, Hartford, CT 06103" aria-label="Service address" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:6px;padding:14px 15px;outline:none;width:100%;box-sizing:border-box"/></div><button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:15px 26px;border:none;border-radius:5px;cursor:pointer;white-space:nowrap">Check your address &rarr;</button></div><p style="margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No upfront cost under our proposed offering · No obligation · Connecticut only</p></form>
 </div>
 <div style="display:flex;align-items:flex-end;gap:clamp(3px,.6vw,6px);height:clamp(72px,9vw,118px)">
 <div style="flex:1;height:22%;background:#e0e8e4;border-radius:2px 2px 0 0"></div>
@@ -154,24 +154,23 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">The program</p>
 <h2 style="margin:0 0 24px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">Connecticut set a target. It runs until 2030.</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:clamp(20px,3vw,36px);align-items:start;margin-bottom:32px;max-width:78ch">
-<p style="margin:0;font-size:17px;line-height:1.62;color:#3a3a37;text-wrap:pretty">Energy Storage Solutions is a statewide program overseen by PURA and administered by the Connecticut Green Bank with Eversource and United Illuminating. It lets qualifying households get battery storage at no upfront cost through approved third-party providers, who own the equipment and are compensated for making that storage available to the grid.</p>
+<p style="margin:0;font-size:17px;line-height:1.62;color:#3a3a37;text-wrap:pretty">Energy Storage Solutions provides incentives for qualifying battery systems, including systems owned by approved third-party providers. Under our proposed model, CT Battery Solutions would own the equipment and use program incentives and other available funding sources to support a $0-upfront-cost offering for qualifying households.</p>
 </div>
 <div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(22px,3vw,34px)">
 <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Statewide behind-the-meter storage goal</span>
+<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Residential behind-the-meter storage goal</span>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Deadline: year-end 2030</span>
 </div>
 <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:20px">
-<span style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(40px,5.4vw,64px);line-height:1;letter-spacing:-.02em">580 MW</span>
-<span style="font-size:16px;line-height:1.5;color:#3a3a37;max-width:34ch;text-wrap:pretty">of storage on homes and businesses, half of it — 290 MW — carved out for residential customers.</span>
+<span style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(40px,5.4vw,64px);line-height:1;letter-spacing:-.02em">150 MW</span>
+<span style="font-size:16px;line-height:1.5;color:#3a3a37;max-width:34ch;text-wrap:pretty">carved out for residential deployment under Energy Storage Solutions, by year-end 2030.</span>
 </div>
 <div style="height:22px;border-radius:5px;background:#f2f1ec;border:1px solid #d8d6ce;display:flex;overflow:hidden;margin-bottom:12px">
-<div style="width:50%;background:#2f5d4e"></div>
-<div style="width:50%"></div>
+<div style="width:2.2%;background:#2f5d4e"></div>
 </div>
 <div style="display:flex;gap:20px;flex-wrap:wrap">
-<span style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#2f5d4e;flex:none"></span>290 MW residential</span>
-<span style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#f2f1ec;border:1px solid #d8d6ce;flex:none"></span>290 MW commercial &amp; industrial</span>
+<span style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#2f5d4e;flex:none"></span>≈3.3 MW residential deployed to date</span>
+<span style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#f2f1ec;border:1px solid #d8d6ce;flex:none"></span>150 MW residential goal</span>
 </div>
 <div style="display:flex;align-items:center;gap:0;margin-top:26px">
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:#6b6b66;flex:none;padding-right:10px">2022</span>
@@ -185,10 +184,10 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:#92600C">Today</span>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:#6b6b66">Target date</span>
 </div>
-<p style="margin:24px 0 0;font-size:15.5px;line-height:1.6;color:#3a3a37;max-width:74ch;text-wrap:pretty">Getting there means a lot of households, and the residential side has been the slower half. That's the gap we're focused on — particularly rental and affordable housing, which most providers skip.</p>
-<p style="margin:14px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;line-height:1.7;color:#6b6b66;max-width:78ch;text-wrap:pretty">Targets per PURA's Energy Storage Solutions program authorization (580 MW behind-the-meter by 2030) and Public Act 21-53. Current deployment figures are published by the program administrators; see energystoragect.com.</p>
+<p style="margin:24px 0 0;font-size:15.5px;line-height:1.6;color:#3a3a37;max-width:74ch;text-wrap:pretty">Residential deployment is still at an early stage. About 3.3 MW of standalone residential battery storage has been completed through the program to date (as of August 2026). <a href="https://energystoragect.com" target="_blank" rel="noopener">See program data &rarr;</a></p>
+<p style="margin:14px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;line-height:1.7;color:#6b6b66;max-width:78ch;text-wrap:pretty">Targets per PURA's Energy Storage Solutions program authorization and Public Act 21-53. Current deployment figures are published by the program administrators; see energystoragect.com.</p>
 </div>
-<div style="border-left:3px solid #92600C;background:#FBF0DA;border-radius:0 8px 8px 0;padding:14px 17px;font-size:15px;line-height:1.6;color:#7A5B0A;margin-top:20px;text-wrap:pretty">Our application is pending, and approval rests entirely with the program administrators. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc. <button type="button" data-open-legal="1" style="font:inherit;color:#7A5B0A;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Where we stand →</button></div>
+<div style="border-left:3px solid #92600C;background:#FBF0DA;border-radius:0 8px 8px 0;padding:14px 17px;font-size:15px;line-height:1.6;color:#7A5B0A;margin-top:20px;text-wrap:pretty">We are preparing to apply to participate as a Third-Party Owner under the Energy Storage Solutions program. Approval is at the discretion of the program administrators. <button type="button" data-open-legal="1" style="font:inherit;color:#7A5B0A;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Where we stand →</button></div>
 </div>
 </section>
 
@@ -204,7 +203,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 </div>
 <div style="background:#f2f1ec;border:1px solid #d8d6ce;border-radius:10px;padding:26px 24px">
 <h3 style="margin:0 0 10px;font-size:18px;font-weight:700;line-height:1.3">If you own the property</h3>
-<p style="margin:0;font-size:16px;line-height:1.6;color:#3a3a37;text-wrap:pretty">The provider owns and maintains the equipment, not you. Connecticut currently exempts residential energy storage from property tax assessment. Final terms would live in a written agreement.</p>
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3a3a37;text-wrap:pretty">Under our proposed model, CT Battery Solutions would own and maintain the equipment. Connecticut currently exempts residential energy storage from property tax assessment. Final terms would live in a written agreement.</p>
 </div>
 </div>
 </div>
@@ -244,13 +243,18 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Sits idle</td>
 </tr>
 <tr>
-<td style="padding:14px 20px;font-weight:700;vertical-align:top">Who pays</td>
-<td style="padding:14px 20px;color:#3a3a37;vertical-align:top">The approved third-party owner, under the program</td>
-<td style="padding:14px 20px;color:#3a3a37;vertical-align:top">The homeowner, plus fuel and service</td>
+<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;font-weight:700;vertical-align:top">Who owns the system</td>
+<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Third-party provider</td>
+<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">The homeowner</td>
+</tr>
+<tr>
+<td style="padding:14px 20px;font-weight:700;vertical-align:top">Upfront homeowner cost</td>
+<td style="padding:14px 20px;color:#3a3a37;vertical-align:top">$0 under our proposed offering*</td>
+<td style="padding:14px 20px;color:#3a3a37;vertical-align:top">Purchase and installation cost</td>
 </tr>
 </table>
 </div>
-<p style="margin:20px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;line-height:1.7;color:#6b6b66;max-width:78ch;text-wrap:pretty">General technology characteristics. Costs, runtimes, and savings vary by home and are not represented here.</p>
+<p style="margin:20px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;line-height:1.7;color:#6b6b66;max-width:78ch;text-wrap:pretty">*Subject to CT Battery Solutions receiving program approval, project eligibility, and final agreement. General technology characteristics. Costs, runtimes, and savings vary by home and are not represented here.</p>
 </div>
 </section>
 
@@ -266,7 +270,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="display:flex;gap:10px;align-items:baseline;font-size:15.5px;color:#3a3a37"><span style="color:#2f5d4e;font-weight:700">✓</span><span>We'd rather have a short honest list than a long one.</span></div>
 </div>
 </div>
-<div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(24px,3vw,32px)"><p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#3a3a37">Start with your address — we serve Connecticut only right now, so we check eligibility first. About a minute, no obligation.</p><form class="ctbs-join-form" action="/get-started/" method="GET"><div class="ctbs-addr-wrap" style="position:relative;margin-bottom:12px"><input class="ctbs-addr-input" type="text" name="address" required autocomplete="off" placeholder="100 Main St, Hartford, CT 06103" aria-label="Service address" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:6px;padding:14px 15px;outline:none;width:100%;box-sizing:border-box"/></div><button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:15px 26px;border:none;border-radius:5px;cursor:pointer;width:100%">See if I qualify &rarr;</button></form></div>
+<div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(24px,3vw,32px)"><p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#3a3a37">Start with your address — we check eligibility first to confirm you're in our current service area. About a minute, no obligation.</p><form class="ctbs-join-form" action="/get-started/" method="GET"><div class="ctbs-addr-wrap" style="position:relative;margin-bottom:12px"><input class="ctbs-addr-input" type="text" name="address" required autocomplete="off" placeholder="100 Main St, Hartford, CT 06103" aria-label="Service address" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:6px;padding:14px 15px;outline:none;width:100%;box-sizing:border-box"/></div><button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:15px 26px;border:none;border-radius:5px;cursor:pointer;width:100%">Check your address &rarr;</button></form></div>
 </div>
 </section>
 
@@ -278,15 +282,15 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="max-width:78ch;border-top:1px solid #d8d6ce">
 <details style="border-bottom:1px solid #d8d6ce">
 <summary style="list-style:none;cursor:pointer;padding:18px 0;font-size:18px;font-weight:700;line-height:1.4;display:flex;justify-content:space-between;gap:20px;align-items:baseline"><span>Are you approved to do this?</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b66;flex:none">▾</span></summary>
-<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">Not yet. Our application is pending and approval is entirely at the program administrators' discretion. Until then we can't enroll, install, own, or operate anything.</p>
+<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">Not yet. We are preparing to apply to participate as a Third-Party Owner. Until approved, we cannot enroll customers or participate in Energy Storage Solutions.</p>
 </details>
 <details style="border-bottom:1px solid #d8d6ce">
 <summary style="list-style:none;cursor:pointer;padding:18px 0;font-size:18px;font-weight:700;line-height:1.4;display:flex;justify-content:space-between;gap:20px;align-items:baseline"><span>Then what am I signing up for?</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b66;flex:none">▾</span></summary>
-<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">A letter of intent — you're telling us you'd be interested, nothing more. It isn't an application, an enrollment, or a contract, and it commits you to nothing. If enrollment opens where you live, we'll get in touch and you decide then.</p>
+<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">A letter of intent — you're telling us you'd be interested, nothing more. It isn't an application, an enrollment, or a contract, and it commits you to nothing. If CT Battery Solutions is approved and begins offering projects in your area, we'll get in touch and you can decide whether to proceed.</p>
 </details>
 <details style="border-bottom:1px solid #d8d6ce">
 <summary style="list-style:none;cursor:pointer;padding:18px 0;font-size:18px;font-weight:700;line-height:1.4;display:flex;justify-content:space-between;gap:20px;align-items:baseline"><span>Is this the state? Are you the utility?</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b66;flex:none">▾</span></summary>
-<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">No. Energy Storage Solutions is a real Connecticut program; we're a private company applying to participate in it. We're not part of the state, the Green Bank, or your utility, and none of them have endorsed us.</p>
+<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">No. Energy Storage Solutions is a real Connecticut program; we're a private company preparing to apply to participate in it. We're not part of the state, the Green Bank, or your utility, and none of them have endorsed us.</p>
 </details>
 <details style="border-bottom:1px solid #d8d6ce">
 <summary style="list-style:none;cursor:pointer;padding:18px 0;font-size:18px;font-weight:700;line-height:1.4;display:flex;justify-content:space-between;gap:20px;align-items:baseline"><span>Who would own the battery?</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b66;flex:none">▾</span></summary>
@@ -302,7 +306,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 </details>
 <details>
 <summary style="list-style:none;cursor:pointer;padding:18px 0;font-size:18px;font-weight:700;line-height:1.4;display:flex;justify-content:space-between;gap:20px;align-items:baseline"><span>What happens to my information?</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#6b6b66;flex:none">▾</span></summary>
-<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">We use it to email you about this program and to see where interest is concentrated. We don't sell it. Reply to any message from us and we'll delete your record.</p>
+<p style="margin:0;padding:0 0 20px;font-size:16.5px;line-height:1.65;color:#3a3a37;text-wrap:pretty">We use it to email you about this program and to see where interest is concentrated. We don't sell it. Reply to any message from us and we'll delete your record. <a href="/privacy/">Read our Privacy Policy &rarr;</a></p>
 </details>
 </div>
 </div>
@@ -320,14 +324,14 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <a href="mailto:info@ctbatterysolutions.com" style="color:#2f5d4e;text-decoration:none">info@ctbatterysolutions.com</a>
 </div>
 </div>
-<p style="margin:24px 0 0;max-width:96ch;font-size:13.5px;line-height:1.75;color:#6b6b66;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. It is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and does not currently install, own, or operate battery energy storage systems. Eligibility, incentives, equipment, and timelines described here are general and illustrative; actual terms depend on final program approval, equipment selection, site-specific engineering, and Connecticut Green Bank enrollment. Nothing on this site is an offer to contract. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc. and have not endorsed it or this site. <button type="button" data-open-legal="1" style="font:inherit;color:#234a3e;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Full legal notice</button></p>
+<p style="margin:24px 0 0;max-width:96ch;font-size:13.5px;line-height:1.75;color:#6b6b66;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. We are preparing to apply to participate as a Third-Party Owner in Connecticut's Energy Storage Solutions program and are not currently approved to enroll customers or participate in the program. Information about eligibility, incentives, equipment, and timelines is general and illustrative and does not constitute an offer to contract. Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions and have not endorsed the company or this site. See our <button type="button" data-open-legal="1" style="font:inherit;color:#234a3e;background:none;border:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Legal &amp; Program Disclosures</button> and <a href="/privacy/">Privacy Policy</a> for more information.</p>
 <p style="margin:18px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;color:#6b6b66">© 2026 CT Battery Solutions, Inc.</p>
 </div>
 </footer>
 
 </div>`;
 export const MODAL_CARD = `<div style="position:sticky;top:0;background:#FBF0DA;border-bottom:1px solid #E8CE85;border-radius:14px 14px 0 0;padding:16px clamp(20px,3vw,32px);display:flex;justify-content:space-between;align-items:center;gap:16px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#7A5B0A">Where we stand · Legal notice</span>
+<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#7A5B0A">Where we stand · Legal &amp; Program Disclosures</span>
 <button type="button" data-close-legal="1" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#7A5B0A;background:transparent;border:1px solid #D8B65E;border-radius:4px;padding:6px 11px;cursor:pointer" style-hover="background:#F6E3B8">Close</button>
 </div>
 <div style="padding:clamp(24px,3vw,34px)">
@@ -355,7 +359,7 @@ export const MODAL_CARD = `<div style="position:sticky;top:0;background:#FBF0DA;
 <div style="background:#FBF0DA;padding:16px 18px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap">
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;font-weight:500;color:#92600C;flex:none">02</span>
 <span style="flex:1 1 140px;font-size:16px;font-weight:700">Registration &amp; application</span>
-<span style="flex:2 1 200px;font-size:15px;line-height:1.55;color:#6B5312">Connecticut registration and the Connecticut Green Bank application, both filed and pending.</span>
+<span style="flex:2 1 200px;font-size:15px;line-height:1.55;color:#6B5312">Registered in Connecticut, preparing our Connecticut Green Bank application.</span>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#7A5B0A;background:#F6E3B8;border-radius:3px;padding:3px 7px;flex:none">Now</span>
 </div>
 <div style="background:#f2f1ec;padding:16px 18px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap">
@@ -373,10 +377,10 @@ export const MODAL_CARD = `<div style="position:sticky;top:0;background:#FBF0DA;
 </div>
 <p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#7A5B0A">Legal notice &amp; program disclosures</p>
 <div style="display:flex;flex-direction:column;gap:13px">
-<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. CT Battery Solutions is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and does not currently install, own, or operate battery energy storage systems. Its application for approval is pending, and approval is at the sole discretion of the program administrators.</p>
-<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Program eligibility, incentive amounts, equipment specifications, and installation timelines described on this site are general and illustrative. Actual terms depend on final program approval, final equipment selection, site-specific engineering, and Connecticut Green Bank enrollment. No representation is made that any household will qualify, that any particular equipment will be installed, or that any particular level of backup capability, savings, or incentive will be available.</p>
-<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Nothing on this site constitutes an offer to contract, an offer to perform home improvement or electrical work in Connecticut, or a solicitation to enroll in any program. Submitting the form on this site creates no agreement of any kind and reserves no incentive funds. Any future installation would be performed by licensed and registered Connecticut contractors under separate written agreement.</p>
-<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc., have not endorsed CT Battery Solutions, its personnel, or this site, and are not responsible for its content. Energy Storage Solutions is a program of the State of Connecticut administered independently of this company; the authoritative source for program terms is <a href="https://energystoragect.com" target="_blank" rel="noopener">energystoragect.com</a>.</p>
-<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Information collected through this site is limited to the name, email address, city or ZIP code, optional telephone number, and housing type you provide. It is used to contact you about this program and to understand where interest is located. It is not sold. You may request correction or deletion of your record at any time using the contact channel from which you were reached.</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">CT Battery Solutions, Inc. is a Delaware corporation. CT Battery Solutions is not currently an approved Third-Party Owner or Eligible Contractor under Connecticut's Energy Storage Solutions program and is not currently offering installations. CT Battery Solutions intends to apply for approval to participate in the Energy Storage Solutions program. Any future approval is at the discretion of the program administrators.</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Program eligibility, incentive amounts, equipment specifications, and installation timelines described on this site are general and illustrative. Actual terms depend on final program approval, final equipment selection, site-specific engineering, and project eligibility and enrollment in Energy Storage Solutions. No representation is made that any household will qualify, that any particular equipment will be installed, or that any particular level of backup capability, savings, or incentive will be available.</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Nothing on this site constitutes an offer to contract, an offer to perform home improvement or electrical work in Connecticut, or an offer to enroll a customer in Energy Storage Solutions. Submitting a form on this site creates no agreement of any kind and does not reserve incentive funds. Any future installation would be performed by appropriately licensed and registered Connecticut contractors under separate written agreements.</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">Connecticut Green Bank, Eversource, and United Illuminating are not affiliated with CT Battery Solutions, Inc., have not endorsed CT Battery Solutions, its personnel, or this site, and are not responsible for its content. Energy Storage Solutions is a statewide program established by PURA and administered by Connecticut Green Bank, Eversource, and United Illuminating; the authoritative source for program terms is <a href="https://energystoragect.com" target="_blank" rel="noopener">energystoragect.com</a>.</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#3a3a37;text-wrap:pretty">For how we handle information you submit through this site, see our <a href="/privacy/">Privacy Policy</a>.</p>
 </div>
 </div>`;
