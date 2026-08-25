@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MAIN, MODAL_CARD, STYLES } from "./preApprovalContent";
+import { MAIN, MODAL_CARD, DISCLAIMERS_CARD, STYLES } from "./preApprovalContent";
 import { enhanceAddressInputs } from "./enhanceAddressInputs";
 
 const FONTS =
@@ -9,6 +9,7 @@ const FONTS =
 
 export default function PreApprovalLanding() {
   const [legalOpen, setLegalOpen] = useState(false);
+  const [disclaimersOpen, setDisclaimersOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   // Wire the static (innerHTML) content: legal-modal triggers + address
@@ -25,6 +26,11 @@ export default function PreApprovalLanding() {
     const teardownAutocomplete = enhanceAddressInputs(el);
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      if (t.closest("[data-open-disclaimers]")) {
+        e.preventDefault();
+        setDisclaimersOpen(true);
+        return;
+      }
       if (t.closest("[data-open-legal]")) {
         e.preventDefault();
         setLegalOpen(true);
@@ -40,17 +46,20 @@ export default function PreApprovalLanding() {
   // Esc closes the modal; lock page scroll while it's open.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLegalOpen(false);
+      if (e.key === "Escape") {
+        setLegalOpen(false);
+        setDisclaimersOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   useEffect(() => {
-    document.body.style.overflow = legalOpen ? "hidden" : "";
+    document.body.style.overflow = legalOpen || disclaimersOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [legalOpen]);
+  }, [legalOpen, disclaimersOpen]);
 
   return (
     <>
@@ -89,6 +98,39 @@ export default function PreApprovalLanding() {
               boxShadow: "0 24px 60px rgba(26,26,24,.28)",
             }}
             dangerouslySetInnerHTML={{ __html: MODAL_CARD }}
+          />
+        </div>
+      )}
+
+      {disclaimersOpen && (
+        <div
+          onClick={() => setDisclaimersOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 200,
+            background: "rgba(26,26,24,.5)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            padding: "clamp(16px,5vh,64px) 16px",
+            overflowY: "auto",
+          }}
+        >
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              if ((e.target as HTMLElement).closest("[data-close-disclaimers]")) setDisclaimersOpen(false);
+            }}
+            style={{
+              background: "#fafaf8",
+              border: "1px solid #d8d6ce",
+              borderRadius: 14,
+              maxWidth: 780,
+              width: "100%",
+              boxShadow: "0 24px 60px rgba(26,26,24,.28)",
+            }}
+            dangerouslySetInnerHTML={{ __html: DISCLAIMERS_CARD }}
           />
         </div>
       )}
