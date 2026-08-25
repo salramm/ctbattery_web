@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { apiFetch } from "@/lib/api";
 import AddressAutocomplete, { type PickedAddress } from "@/components/AddressAutocomplete";
+import ShareBox from "@/components/ShareBox";
 
 const C = {
   brand: "#2f5d4e",
@@ -328,12 +329,21 @@ export default function GetStartedWizard() {
         {step === 4 && (
           <Panel eyebrow="Done" title="You're on the list — thank you.">
             <p style={lead}>
-              Your Letter of Intent <strong>{loiNumber}</strong> was created and downloaded to your device.
-              We&apos;ve got your interest on record and will email you as the program moves forward.
+              Your Letter of Intent was created and downloaded to your device. We&apos;ve got your interest on
+              record and will email you as the program moves forward.
             </p>
-            <a href="/" style={{ ...btnPrimary, display: "inline-block", textDecoration: "none", marginTop: 8 }}>← Back to home</a>
+            <div style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 16px", margin: "0 0 4px" }}>
+              <div style={{ ...mono, fontSize: 10.5, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase", color: C.muted, marginBottom: 6 }}>
+                Letter of Intent no.
+              </div>
+              <div style={{ ...mono, fontSize: 18, color: C.ink }}>{loiNumber}</div>
+            </div>
+            <ShareBox url={shareUrl()} />
+            <a href="/" style={{ ...btnPrimary, display: "inline-block", textDecoration: "none", marginTop: 18 }}>← Back to home</a>
           </Panel>
         )}
+
+        <FlowDisclaimer step={step} />
       </main>
     </div>
   );
@@ -420,6 +430,30 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 
 function mono2() {
   return "font-family:'JetBrains Mono',ui-monospace,monospace";
+}
+
+// Persistent disclaimer shown on every step of the flow; adds LOI-specific
+// language once the visitor reaches the Letter of Intent steps.
+function FlowDisclaimer({ step }: { step: number }) {
+  const loi = step >= 3;
+  return (
+    <p style={{ ...mono, fontSize: 11.5, lineHeight: 1.75, color: C.muted, margin: "18px 4px 0", maxWidth: 720 }}>
+      Joining the list places you under no obligation. It is not an application, enrollment, or contract, and it
+      does not guarantee eligibility, program approval, incentives, or service. Connecticut only.
+      {loi
+        ? " A Letter of Intent is non-binding — it is not a contract, reserves no incentive funds, and commits you to nothing. Any project depends on CT Battery Solutions receiving program approval, your eligibility, and a separate written agreement."
+        : ""}{" "}
+      Program terms are set by the administrators; see{" "}
+      <a href="https://energystoragect.com" target="_blank" rel="noopener" style={{ color: C.brandDark }}>
+        energystoragect.com
+      </a>
+      .
+    </p>
+  );
+}
+
+function shareUrl() {
+  return typeof window !== "undefined" ? `${window.location.origin}/` : "https://ctbatterysolutions.com/";
 }
 
 // base64 → Blob → trigger a client-side download

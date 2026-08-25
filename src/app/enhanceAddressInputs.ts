@@ -21,26 +21,39 @@ export function enhanceAddressInputs(root: HTMLElement): () => void {
     const list = document.createElement("ul");
     Object.assign(list.style, {
       position: "absolute",
-      top: "calc(100% + 4px)",
+      top: "calc(100% + 6px)",
       left: "0",
       right: "0",
       zIndex: "10050",
       margin: "0",
-      padding: "4px",
+      padding: "5px",
       listStyle: "none",
       background: "#fff",
       border: "1px solid #d8d6ce",
-      borderRadius: "8px",
-      boxShadow: "0 12px 32px rgba(26,26,24,.16)",
-      maxHeight: "260px",
+      borderRadius: "10px",
+      boxShadow: "0 14px 36px rgba(26,26,24,.18)",
+      maxHeight: "280px",
       overflowY: "auto",
       display: "none",
     } as CSSStyleDeclaration);
     wrap.appendChild(list);
 
+    const PIN = (color: string) =>
+      `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><path d="M12 21s-7-7.5-7-12a7 7 0 1 1 14 0c0 4.5-7 12-7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+
     let items: Suggestion[] = [];
     let active = -1;
+    let loading = false;
+    let touched = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const msgRow = (text: string) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      Object.assign(li.style, { padding: "10px 12px", fontSize: "14px", color: "#8a8a82" } as CSSStyleDeclaration);
+      list.appendChild(li);
+      list.style.display = "block";
+    };
 
     const clearCoords = () =>
       form?.querySelectorAll("input[data-coord]").forEach((n) => n.remove());
@@ -64,17 +77,34 @@ export function enhanceAddressInputs(root: HTMLElement): () => void {
 
     const render = () => {
       list.innerHTML = "";
+      if (loading && items.length === 0) {
+        msgRow("Searching…");
+        return;
+      }
+      if (touched && items.length === 0) {
+        msgRow("No matches — you can type your full address and continue.");
+        return;
+      }
       items.forEach((s, i) => {
         const li = document.createElement("li");
-        li.textContent = s.label;
+        const on = i === active;
         Object.assign(li.style, {
-          padding: "9px 12px",
+          display: "flex",
+          gap: "10px",
+          alignItems: "flex-start",
+          padding: "10px 12px",
           fontSize: "14.5px",
-          color: "#1a1a1a",
+          lineHeight: "1.4",
+          color: "#3a3a37",
           cursor: "pointer",
-          borderRadius: "5px",
-          background: i === active ? "#eef3f1" : "#fff",
+          borderRadius: "7px",
+          background: on ? "#eef3f1" : "#fff",
         } as CSSStyleDeclaration);
+        const label = document.createElement("span");
+        label.textContent = s.label;
+        label.style.minWidth = "0";
+        li.innerHTML = PIN(on ? "#2f5d4e" : "#b3b3ab");
+        li.appendChild(label);
         li.addEventListener("mousedown", (e) => {
           e.preventDefault();
           input.value = s.label;
@@ -96,18 +126,27 @@ export function enhanceAddressInputs(root: HTMLElement): () => void {
       if (timer) clearTimeout(timer);
       if (q.length < 3) {
         items = [];
+        loading = false;
+        touched = false;
         hide();
         return;
       }
+      loading = true;
+      touched = false;
+      active = -1;
+      render(); // show "Searching…"
       timer = setTimeout(async () => {
         try {
           const res = await fetch(`${API_BASE}/api/lookup/suggest?q=${encodeURIComponent(q)}`);
           const json = await res.json();
           items = json?.data?.suggestions ?? [];
+        } catch {
+          items = []; /* freeform submit still works */
+        } finally {
+          loading = false;
+          touched = true;
           active = -1;
           render();
-        } catch {
-          /* freeform submit still works */
         }
       }, 250);
     };
