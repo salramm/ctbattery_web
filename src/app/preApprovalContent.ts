@@ -35,12 +35,11 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 </div>
 </header>
 
-<section style="padding:clamp(48px,7vw,88px) 0 0;border-bottom:1px solid #e5e3dc">
+<section style="padding:clamp(24px,3.5vw,40px) 0 0;border-bottom:1px solid #e5e3dc">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
-<p style="margin:0 0 24px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">Connecticut Energy Storage Solutions</p>
 <h1 style="margin:0 0 28px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(38px,6.6vw,84px);line-height:1.02;letter-spacing:-.022em;max-width:20ch;text-wrap:pretty">Residential battery storage with <em style="font-style:italic;color:#2f5d4e">no upfront cost to you.</em></h1>
 <div style="padding-bottom:clamp(36px,4vw,52px)">
-<p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">We're developing a third-party ownership model that would allow qualifying Connecticut households to receive battery backup without purchasing the equipment themselves, supported in part by Connecticut's Energy Storage Solutions program. Join the list and we'll contact you if and when CT Battery Solutions is approved and begins enrolling projects in your area.</p>
+<p style="margin:0 0 26px;max-width:52ch;font-size:clamp(17px,1.5vw,20px);line-height:1.55;color:#3a3a37;text-wrap:pretty">We're developing a third-party ownership model that would allow qualifying Connecticut households to receive battery backup without purchasing the equipment themselves, supported in part by Connecticut's Energy Storage Solutions program. Check your address to see if you qualify, and join the list — we'll reach out if and when CT Battery Solutions is approved and begins enrolling projects in your area.</p>
 <form class="ctbs-hero-form" action="/get-started/" method="GET" style="max-width:560px;margin-top:4px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div class="ctbs-addr-wrap" style="flex:1 1 260px;min-width:0;position:relative"><input class="ctbs-addr-input" type="text" name="address" required autocomplete="off" placeholder="100 Main St, Hartford, CT 06103" aria-label="Service address" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a;background:#fff;border:1px solid #d8d6ce;border-radius:6px;padding:14px 15px;outline:none;width:100%;box-sizing:border-box"/></div><button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#2f5d4e;color:#fff;font-size:16.5px;font-weight:500;padding:15px 26px;border:none;border-radius:5px;cursor:pointer;white-space:nowrap">Check your address &rarr;</button></div><p style="margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:#6b6b66">No upfront cost under our proposed offering · No obligation · Connecticut only</p></form>
 </div>
 <div style="display:flex;align-items:flex-end;gap:clamp(3px,.6vw,6px);height:clamp(72px,9vw,118px)">
@@ -96,7 +95,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="height:9px;border-radius:1px;background:#c7dbd2"></div>
 </div>
 <h3 style="margin:0;font-size:18px;font-weight:700;line-height:1.3">It holds</h3>
-<p style="margin:0;font-size:15.5px;line-height:1.6;color:#3a3a37;text-wrap:pretty">Stored energy waits until it's worth more — to the household or to the grid.</p>
+<p style="margin:0;font-size:15.5px;line-height:1.6;color:#3a3a37;text-wrap:pretty">Stored energy stays ready — held for the times the grid needs that power most.</p>
 </div>
 <div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:10px;padding:22px 22px 24px;display:flex;flex-direction:column;gap:16px">
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#6b6b66">Step three</span>
@@ -108,7 +107,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <div style="flex:1;height:20%;background:#d8d6ce;border-radius:2px"></div>
 </div>
 <h3 style="margin:0;font-size:18px;font-weight:700;line-height:1.3">It releases</h3>
-<p style="margin:0;font-size:15.5px;line-height:1.6;color:#3a3a37;text-wrap:pretty">Into the home when the grid is down, or back to the grid on high-demand days.</p>
+<p style="margin:0;font-size:15.5px;line-height:1.6;color:#3a3a37;text-wrap:pretty">On a signal from the grid — or when the power goes out — it sends the stored energy back out.</p>
 </div>
 </div>
 <p style="margin:22px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;line-height:1.7;color:#6b6b66;max-width:78ch;text-wrap:pretty">General description of the technology. Diagrams are illustrative. Equipment, sizing, and system design would follow program approval and a site-specific assessment.</p>
@@ -117,32 +116,31 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 
 <section style="padding:clamp(48px,6vw,80px) 0;border-bottom:1px solid #e5e3dc">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
-<p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">A day in the life</p>
-<h2 style="margin:0 0 32px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">It fills up when the grid is calm and empties when it isn't.</h2>
+<p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">Across the year</p>
+<h2 style="margin:0 0 32px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">It waits most of the year, then steps in when the grid is strained.</h2>
 <div style="background:#f2f1ec;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(20px,3vw,32px)">
-<div style="display:flex;align-items:flex-end;gap:clamp(3px,.7vw,7px);height:132px">
-<div style="flex:1;height:34%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:48%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:62%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:78%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:92%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:100%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:96%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:88%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:74%;background:#2f5d4e;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:52%;background:#2f5d4e;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:30%;background:#2f5d4e;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:16%;background:#2f5d4e;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:26%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
-<div style="flex:1;height:40%;background:#c7dbd2;border-radius:3px 3px 0 0"></div>
+<div style="display:flex;align-items:flex-end;gap:clamp(4px,1vw,10px);height:150px">
+<div style="flex:1;height:76%;background:#2f5d4e;border-radius:3px 3px 0 0" title="January — winter peak"></div>
+<div style="flex:1;height:64%;background:#2f5d4e;border-radius:3px 3px 0 0" title="February — winter peak"></div>
+<div style="flex:1;height:20%;background:#c7dbd2;border-radius:3px 3px 0 0" title="March — standby"></div>
+<div style="flex:1;height:16%;background:#c7dbd2;border-radius:3px 3px 0 0" title="April — standby"></div>
+<div style="flex:1;height:24%;background:#c7dbd2;border-radius:3px 3px 0 0" title="May — standby"></div>
+<div style="flex:1;height:56%;background:#2f5d4e;border-radius:3px 3px 0 0" title="June — summer ramp"></div>
+<div style="flex:1;height:88%;background:#2f5d4e;border-radius:3px 3px 0 0" title="July — summer peak"></div>
+<div style="flex:1;height:100%;background:#2f5d4e;border-radius:3px 3px 0 0" title="August — summer peak"></div>
+<div style="flex:1;height:62%;background:#92600C;border-radius:3px 3px 0 0" title="September — storm/outage backup"></div>
+<div style="flex:1;height:20%;background:#c7dbd2;border-radius:3px 3px 0 0" title="October — standby"></div>
+<div style="flex:1;height:26%;background:#c7dbd2;border-radius:3px 3px 0 0" title="November — standby"></div>
+<div style="flex:1;height:72%;background:#2f5d4e;border-radius:3px 3px 0 0" title="December — winter peak"></div>
 </div>
 <div style="height:1px;background:#1a1a1a;margin:0 0 10px"></div>
 <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;color:#6b6b66;flex-wrap:wrap;gap:8px">
-<span>Overnight</span><span>Midday</span><span>Evening peak</span><span>Overnight</span>
+<span>Winter</span><span>Spring</span><span>Summer</span><span>Fall</span><span>Winter</span>
 </div>
 <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid #d8d6ce">
-<span style="display:flex;align-items:center;gap:8px;font-size:14.5px;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#c7dbd2;flex:none"></span>Charging</span>
-<span style="display:flex;align-items:center;gap:8px;font-size:14.5px;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#2f5d4e;flex:none"></span>Releasing stored power when statewide demand is high</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:14.5px;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#c7dbd2;flex:none"></span>Standby — charged and waiting</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:14.5px;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#2f5d4e;flex:none"></span>Discharges on summer &amp; winter grid peaks</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:14.5px;color:#3a3a37"><span style="width:11px;height:11px;border-radius:2px;background:#92600C;flex:none"></span>Backup during storms &amp; outages</span>
 </div>
 <p style="margin:18px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;line-height:1.7;color:#6b6b66;text-wrap:pretty">Illustrative pattern only. Actual dispatch windows are set by program rules.</p>
 </div>
@@ -152,13 +150,13 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <section id="program" style="padding:clamp(48px,6vw,80px) 0;border-bottom:1px solid #e5e3dc;background:#f2f1ec">
 <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p style="margin:0 0 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:#6b6b66">The program</p>
-<h2 style="margin:0 0 24px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">Connecticut set a target. It runs until 2030.</h2>
+<h2 style="margin:0 0 24px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:26ch;text-wrap:pretty">Connecticut set a target. <span style="white-space:nowrap">It runs until 2030.</span></h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:clamp(20px,3vw,36px);align-items:start;margin-bottom:32px;max-width:78ch">
 <p style="margin:0;font-size:17px;line-height:1.62;color:#3a3a37;text-wrap:pretty">Energy Storage Solutions provides incentives for qualifying battery systems, including systems owned by approved third-party providers. Under our proposed model, CT Battery Solutions would own the equipment and use program incentives and other available funding sources to support a $0-upfront-cost offering for qualifying households.</p>
 </div>
 <div style="background:#fafaf8;border:1px solid #d8d6ce;border-radius:12px;padding:clamp(22px,3vw,34px)">
 <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px">
-<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Residential behind-the-meter storage goal</span>
+<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Residential storage goal</span>
 <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;color:#6b6b66">Deadline: year-end 2030</span>
 </div>
 <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:20px">
@@ -198,10 +196,12 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <h2 style="margin:0 0 32px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:clamp(26px,2.8vw,38px);line-height:1.18;letter-spacing:-.01em;max-width:22ch;text-wrap:pretty">Renting shouldn't rule you out.</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:20px">
 <div style="background:#f2f1ec;border:1px solid #d8d6ce;border-radius:10px;padding:26px 24px">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2f5d4e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-bottom:14px" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
 <h3 style="margin:0 0 10px;font-size:18px;font-weight:700;line-height:1.3">If you rent</h3>
 <p style="margin:0;font-size:16px;line-height:1.6;color:#3a3a37;text-wrap:pretty">A battery is permanently mounted, so the property owner has to agree in writing. We plan to handle that conversation ourselves rather than leaving it to you. Renters are welcome on the list now.</p>
 </div>
 <div style="background:#f2f1ec;border:1px solid #d8d6ce;border-radius:10px;padding:26px 24px">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2f5d4e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-bottom:14px" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
 <h3 style="margin:0 0 10px;font-size:18px;font-weight:700;line-height:1.3">If you own the property</h3>
 <p style="margin:0;font-size:16px;line-height:1.6;color:#3a3a37;text-wrap:pretty">Under our proposed model, CT Battery Solutions would own and maintain the equipment. Connecticut currently exempts residential energy storage from property tax assessment. Final terms would live in a written agreement.</p>
 </div>
@@ -224,7 +224,7 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 </tr>
 <tr>
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;font-weight:700;vertical-align:top">Fuel</td>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Recharges from the grid</td>
+<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Electricity</td>
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Propane or natural gas</td>
 </tr>
 <tr>
@@ -236,16 +236,6 @@ export const MAIN = `<div style="background:#fafaf8;color:#1a1a1a;font-family:'D
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;font-weight:700;vertical-align:top">Upkeep</td>
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Monitored by the provider</td>
 <td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Periodic service and exercise cycles</td>
-</tr>
-<tr>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;font-weight:700;vertical-align:top">Between outages</td>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Supports the grid on high-demand days</td>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Sits idle</td>
-</tr>
-<tr>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;font-weight:700;vertical-align:top">Who owns the system</td>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">Third-party provider</td>
-<td style="padding:14px 20px;border-bottom:1px solid #e5e3dc;color:#3a3a37;vertical-align:top">The homeowner</td>
 </tr>
 <tr>
 <td style="padding:14px 20px;font-weight:700;vertical-align:top">Upfront homeowner cost</td>
