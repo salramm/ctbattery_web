@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { API_BASE } from "@/lib/api";
-import { getAuthToken } from "@/lib/auth";
+import { authedFetch } from "@/lib/auth";
 
 type Lead = {
   id: number;
@@ -27,17 +26,10 @@ export default function LeadsClient() {
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    const token = getAuthToken();
-    if (!token) {
-      setError("Not signed in.");
-      return;
-    }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/api/leads?page=${page}&limit=${LIMIT}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authedFetch(`/api/leads?page=${page}&limit=${LIMIT}`);
       const json = await res.json();
       if (!res.ok || json?.success === false) {
         throw new Error(json?.message || `Request failed (${res.status})`);

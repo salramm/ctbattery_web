@@ -52,3 +52,48 @@ export async function clearSession(): Promise<void> {
     localStorage.removeItem(USER_KEY);
   }
 }
+
+// Guard so a burst of concurrent 401s (several dashboards loading at once) only
+// clears the session and redirects once.
+let loggingOut = false;
+
+/**
+ * Hard logout: wipe the stored session (API JWT + Firebase) and send the user to
+ * /login so they can sign back in. Called when the API rejects our token as
+ * expired/invalid — leaving a dead token in place would strand the user in a
+ * portal that can't load anything.
+ */
+export async function forceLogout(reason?: string): Promise<void> {
+  if (loggingOut) return;
+  loggingOut = true;
+  await clearSession();
+  if (typeof window !== "undefined") {
+    const q = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+    window.location.assign(`/login${q}`);
+  }
+}
+
+/**
+ * Fetch an admin API endpoint with the JWT attached. If there is no token, or the
+ * server rejects it as expired/invalid (401), log the user out completely and
+ * redirect to /login. Returns the raw Response so callers can parse JSON or a
+ * blob (e.g. LOI PDF) as before.
+ */
+export async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const token = getAuthToken();
+  if (!token) {
+    await forceLogout("expired");
+    throw new Error("Session expired — please sign in again.");
+  }
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: { ...(init.headers ?? {}), Authorization: `Bearer ${token}` },
+  });
+  // 401 is the backend's NO_TOKEN / INVALID_TOKEN (expired JWT). 403 is a wrong
+  // role, not an expired token, so it must NOT trigger a logout.
+  if (res.status === 401) {
+    await forceLogout("expired");
+    throw new Error("Session expired — please sign in again.");
+  }
+  return res;
+}

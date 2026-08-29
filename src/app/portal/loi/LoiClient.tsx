@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { API_BASE } from "@/lib/api";
-import { getAuthToken } from "@/lib/auth";
+import { authedFetch } from "@/lib/auth";
 
 type Loi = {
   id: number;
@@ -38,17 +37,10 @@ export default function LoiClient() {
   const [downloading, setDownloading] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const token = getAuthToken();
-    if (!token) {
-      setError("Not signed in.");
-      return;
-    }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/api/loi?page=${page}&limit=${LIMIT}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authedFetch(`/api/loi?page=${page}&limit=${LIMIT}`);
       const json = await res.json();
       if (!res.ok || json?.success === false) {
         throw new Error(json?.message || `Request failed (${res.status})`);
@@ -67,16 +59,9 @@ export default function LoiClient() {
   }, [load]);
 
   const downloadPdf = useCallback(async (loi: Loi) => {
-    const token = getAuthToken();
-    if (!token) {
-      setError("Not signed in.");
-      return;
-    }
     setDownloading(loi.id);
     try {
-      const res = await fetch(`${API_BASE}/api/loi/${loi.id}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authedFetch(`/api/loi/${loi.id}/pdf`);
       if (!res.ok) {
         throw new Error(`Download failed (${res.status})`);
       }

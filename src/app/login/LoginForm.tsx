@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth";
 
@@ -8,8 +8,15 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+
+  // Show a note when we were redirected here by an expired/invalid session.
+  useEffect(() => {
+    const reason = new URLSearchParams(window.location.search).get("reason");
+    if (reason === "expired") setNotice("Your session expired. Please sign in again.");
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,6 +35,7 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate>
+      {notice && !error && <div className="notice">{notice}</div>}
       {error && <div className="err">{error}</div>}
 
       <div className="field">

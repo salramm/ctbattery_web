@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { API_BASE } from "@/lib/api";
-import { getAuthToken } from "@/lib/auth";
+import { authedFetch } from "@/lib/auth";
 
 declare global {
   interface Window {
@@ -78,8 +77,7 @@ function popupHtml(s: System): string {
 }
 
 async function opsFetch<T>(path: string): Promise<T> {
-  const token = getAuthToken();
-  const res = await fetch(`${API_BASE}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await authedFetch(path); // logs out on an expired/invalid token
   const json = await res.json();
   if (!res.ok || json?.success === false) throw new Error(json?.message || `Request failed (${res.status})`);
   return json.data as T;

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "@/lib/api";
+import { forceLogout } from "@/lib/auth";
 
 // The list endpoint is admin-gated (Bearer JWT). In production the token comes
 // from the Firebase login exchange; until that's wired we read/store it in
@@ -56,8 +57,8 @@ export default function ApplicationsClient() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
-        setNeedsAuth(true);
-        setError("Session expired or invalid token — please reconnect.");
+        // Expired/invalid token — log out completely so they can sign back in.
+        await forceLogout("expired");
         return;
       }
       const json = await res.json();
@@ -86,6 +87,10 @@ export default function ApplicationsClient() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
       });
+      if (res.status === 401) {
+        await forceLogout("expired");
+        return;
+      }
       if (!res.ok) throw new Error("Update failed");
       setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     } catch {

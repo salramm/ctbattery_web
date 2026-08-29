@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { API_BASE } from "@/lib/api";
-import { getAuthToken } from "@/lib/auth";
+import { authedFetch } from "@/lib/auth";
 
 type Kpi = { label: string; value: string; sub: string; tone?: string };
 type Alert = { id: string; code: string; message: string; severity: string; customer: string; town: string; openedAt: string };
@@ -26,8 +25,7 @@ const HEALTH: Record<string, { bg: string; fg: string; label: string }> = {
 const SEV: Record<string, string> = { CRITICAL: "var(--c-red)", WARN: "var(--c-amber)", INFO: "var(--c-teal)" };
 
 async function opsFetch<T>(path: string): Promise<T> {
-  const token = getAuthToken();
-  const res = await fetch(`${API_BASE}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await authedFetch(path); // logs out on an expired/invalid token
   const json = await res.json();
   if (!res.ok || json?.success === false) throw new Error(json?.message || `Request failed (${res.status})`);
   return json.data as T;

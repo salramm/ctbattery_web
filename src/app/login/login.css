@@ -119,6 +119,16 @@
   margin-bottom: 16px;
 }
 
+.gsa .notice {
+  background: #FBF0DA;
+  border-left: 2px solid #92600C;
+  padding: 10px 14px;
+  border-radius: 0 3px 3px 0;
+  font-size: 13px;
+  color: #7A5B0A;
+  margin-bottom: 16px;
+}
+
 .gsa .btn-primary {
   width: 100%;
   appearance: none; border: 0;
