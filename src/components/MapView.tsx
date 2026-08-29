@@ -78,13 +78,14 @@ export default function MapView({
 
     L.control.zoom({ position: "topright" }).addTo(map);
 
-    // Clean dark tile layer
+    // Keyless light basemap (Esri World Light Gray) — CARTO's public basemap now
+    // requires an API key and watermarks tiles.
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
       {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        attribution: "Tiles &copy; Esri",
         maxZoom: 19,
+        maxNativeZoom: 16,
       }
     ).addTo(map);
 

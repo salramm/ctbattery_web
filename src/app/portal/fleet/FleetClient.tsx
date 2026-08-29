@@ -115,10 +115,12 @@ export default function FleetClient() {
         if (cancelled || !mapEl.current || mapObj.current) return;
         const map = L.map(mapEl.current, { zoomControl: true, scrollWheelZoom: true }).setView([41.6, -72.7], 8);
         mapObj.current = map;
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-          attribution: '&copy; <a href="https://openstreetmap.org">OSM</a> &copy; <a href="https://carto.com">CARTO</a>',
-          subdomains: "abcd",
+        // Keyless light basemap (Esri World Light Gray) — CARTO's public basemap
+        // now requires an API key.
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+          attribution: "Tiles &copy; Esri",
           maxZoom: 19,
+          maxNativeZoom: 16,
         }).addTo(map);
         const pts: [number, number][] = [];
         fleet.systems.forEach((s) => {

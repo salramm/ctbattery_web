@@ -33,16 +33,9 @@ type Qualify = {
   message?: string;
 };
 
-type LayerMeta = { color: string; label: string; group: "ESS" | "ITC" | "MFAH" | "UTIL"; desc: string; point?: boolean; line?: boolean };
+type LayerGroup = "ITC" | "ESS" | "GRIDEDGE" | "UI";
+type LayerMeta = { color: string; label: string; group: LayerGroup; desc: string; point?: boolean; line?: boolean };
 const LAYER_META: Record<string, LayerMeta> = {
-  "ej-block-groups": {
-    color: "#7c3aed", label: "EJ Block Groups", group: "ESS",
-    desc: "Environmental Justice block groups → enhanced ESS compensation tier.",
-  },
-  "distressed-municipalities": {
-    color: "#d97706", label: "Distressed Municipalities", group: "ESS",
-    desc: "State distressed (& grace-period) towns → enhanced ESS compensation tier.",
-  },
   "energy-communities": {
     color: "#1d4e89", label: "Energy Communities", group: "ITC",
     desc: "IRA energy communities (coal-closure + fossil-fuel employment) → +10% ITC.",
@@ -51,20 +44,35 @@ const LAYER_META: Record<string, LayerMeta> = {
     color: "#0f6b6b", label: "NMTC Low-Income Tracts", group: "ITC",
     desc: "NMTC qualified low-income census tracts → §48(e) Cat 1, +10% ITC.",
   },
+  "ej-block-groups": {
+    color: "#7c3aed", label: "EJ Block Groups", group: "ESS",
+    desc: "Environmental Justice block groups → enhanced ESS compensation tier.",
+  },
+  "distressed-municipalities": {
+    color: "#d97706", label: "Distressed Municipalities", group: "ESS",
+    desc: "State distressed (& grace-period) towns → enhanced ESS compensation tier.",
+  },
   "mfah-properties": {
-    color: "#b8341f", label: "Affordable-housing (MFAH)", group: "MFAH", point: true,
+    color: "#b8341f", label: "Affordable-housing (MFAH)", group: "ESS", point: true,
     desc: "LIHTC / Section 8 / public housing (5+ units) → ESS Low-Income tier + ITC Cat 3.",
   },
-  "ui-service-areas": {
-    color: "#0891b2", label: "UI service territory", group: "UTIL",
-    desc: "United Illuminating electric service territory (by town).",
-  },
   "ui-grid-edge": {
-    color: "#dc2626", label: "UI Grid Edge circuits", group: "UTIL", line: true,
+    color: "#dc2626", label: "UI Grid Edge circuits", group: "GRIDEDGE", line: true,
     desc: "UI distribution circuits flagged Grid Edge → $130/kWh ESS enrollment when a site is on one.",
   },
+  "ui-service-areas": {
+    color: "#0891b2", label: "UI service territory", group: "UI",
+    desc: "United Illuminating electric service territory (by town).",
+  },
 };
-const GROUP_LABEL = { ESS: "ESS compensation tier", ITC: "Federal ITC adders", MFAH: "Affordable housing", UTIL: "United Illuminating" } as const;
+// Rendered in this order in the layer control.
+const GROUP_ORDER: LayerGroup[] = ["ITC", "ESS", "GRIDEDGE", "UI"];
+const GROUP_LABEL: Record<LayerGroup, string> = {
+  ITC: "Federal ITC adders",
+  ESS: "ESS compensation tier",
+  GRIDEDGE: "Grid Edge",
+  UI: "United Illuminating",
+};
 
 // ---- Eversource Grid Edge (hosting capacity) vector-tile overlay -----------
 // Large (≈961k parcels) → served as a PMTiles vector-tile archive and rendered
@@ -233,10 +241,12 @@ export default function EssClient() {
       if (cancelled || !mapEl.current || mapObj.current) return;
       const map = L.map(mapEl.current, { zoomControl: true, scrollWheelZoom: true }).setView([41.6, -72.7], 8);
       mapObj.current = map;
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        attribution: "&copy; OSM &copy; CARTO",
-        subdomains: "abcd",
+      // Keyless light basemap (Esri World Light Gray). CARTO's public basemap now
+      // requires an API key and stamps "API Key Required" on every tile.
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        attribution: "Tiles &copy; Esri",
         maxZoom: 19,
+        maxNativeZoom: 16,
       }).addTo(map);
       // Grid Edge fills live in the GL canvas (no Leaflet features) — surface
       // their attributes by querying the GL map at the clicked point.
@@ -468,77 +478,87 @@ export default function EssClient() {
   const anyLoaded = status?.layers.some((l) => l.loaded);
 
   // Layer toggles — rendered both above the map and inside the full-screen overlay.
+  // One status-layer toggle row (backend GeoJSON layer).
+  const statusToggle = (l: LayerStatus) => (
+    <label key={l.name} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: l.loaded ? "pointer" : "default" }}>
+      <input
+        type="checkbox"
+        disabled={!l.loaded}
+        checked={!!visible[l.name]}
+        onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
+        style={{ marginTop: 3 }}
+      />
+      <span style={{ width: 11, height: 11, borderRadius: 3, background: LAYER_META[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3, marginTop: 3, flex: "none" }} />
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 500, color: l.loaded ? "var(--ink)" : "var(--ink-4)" }}>
+          {LAYER_META[l.name]?.label ?? l.label} {l.loaded ? <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--ink-3)", fontWeight: 400 }}>({l.features})</span> : "· not loaded"}
+        </span>
+        <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>{LAYER_META[l.name]?.desc}</span>
+      </span>
+    </label>
+  );
+
   const layerControls = (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16 }}>
-      {(["ESS", "ITC", "MFAH", "UTIL"] as const).map((group) => (
-        <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
-          <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
-            {GROUP_LABEL[group]}
+      {GROUP_ORDER.map((group) => {
+        const layers = (status?.layers ?? []).filter((l) => LAYER_META[l.name]?.group === group);
+        // GRIDEDGE also carries the Eversource hosting-capacity vector overlay.
+        if (layers.length === 0 && group !== "GRIDEDGE") return null;
+        return (
+          <div key={group} style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
+              {GROUP_LABEL[group]}
+            </div>
+            {layers.map(statusToggle)}
+
+            {group === "GRIDEDGE" && (
+              <>
+                {/* Eversource Grid Edge — client-side vector-tile hosting-capacity overlay. */}
+                <div style={{ fontFamily: "var(--mono)", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-4)", margin: "8px 0 2px" }}>
+                  Eversource · hosting capacity
+                </div>
+                <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+                  <input type="checkbox" checked={gridEdge.parcels} onChange={(e) => setGridEdge((g) => ({ ...g, parcels: e.target.checked }))} style={{ marginTop: 3 }} />
+                  <span style={{ width: 11, height: 11, borderRadius: 3, background: "#FF6600", marginTop: 3, flex: "none" }} />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>Parcels</span>
+                    <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Parcel-level hosting capacity (~961k). Overzoomed above z13.</span>
+                  </span>
+                </label>
+                <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
+                  <input type="checkbox" checked={gridEdge.streets} onChange={(e) => setGridEdge((g) => ({ ...g, streets: e.target.checked }))} style={{ marginTop: 3 }} />
+                  <span style={{ width: 11, height: 11, borderRadius: 3, background: "#009933", marginTop: 3, flex: "none" }} />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>MV network zones</span>
+                    <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Medium-voltage circuit hosting-capacity zones.</span>
+                  </span>
+                </label>
+
+                <div style={{ marginTop: 8 }}>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Behavior / season</span>
+                  <select
+                    value={capacityProp}
+                    onChange={(e) => setCapacityProp(e.target.value)}
+                    style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "7px 9px", border: "1px solid var(--rule)", borderRadius: 6, background: "#fff", color: "var(--ink)", outline: "none" }}
+                  >
+                    {CAPACITY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+                  </select>
+                </div>
+
+                {/* Color ramp legend (kW). */}
+                <div style={{ display: "flex", marginTop: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--rule-2)" }}>
+                  {GE_RAMP.map((r) => (
+                    <div key={r.min} title={`${r.label} kW`} style={{ flex: 1, height: 10, background: r.color }} />
+                  ))}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontFamily: "var(--mono)", fontSize: 8.5, color: "var(--ink-3)" }}>
+                  <span>0</span><span>500</span><span>2k</span><span>5k+ kW</span>
+                </div>
+              </>
+            )}
           </div>
-          {(status?.layers ?? []).filter((l) => LAYER_META[l.name]?.group === group).map((l) => (
-            <label key={l.name} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: l.loaded ? "pointer" : "default" }}>
-              <input
-                type="checkbox"
-                disabled={!l.loaded}
-                checked={!!visible[l.name]}
-                onChange={(e) => setVisible((v) => ({ ...v, [l.name]: e.target.checked }))}
-                style={{ marginTop: 3 }}
-              />
-              <span style={{ width: 11, height: 11, borderRadius: 3, background: LAYER_META[l.name]?.color ?? "#2f5d4e", opacity: l.loaded ? 1 : 0.3, marginTop: 3, flex: "none" }} />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 13.5, fontWeight: 500, color: l.loaded ? "var(--ink)" : "var(--ink-4)" }}>
-                  {LAYER_META[l.name]?.label ?? l.label} {l.loaded ? <span style={{ fontFamily: "var(--mono)", fontSize: 10.5, color: "var(--ink-3)", fontWeight: 400 }}>({l.features})</span> : "· not loaded"}
-                </span>
-                <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>{LAYER_META[l.name]?.desc}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-      ))}
-
-      {/* Eversource Grid Edge — client-side vector-tile overlay (not a backend layer). */}
-      <div style={{ background: "var(--bg-soft)", borderRadius: 8, padding: "12px 14px" }}>
-        <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 10 }}>
-          Eversource · Grid Edge (hosting capacity)
-        </div>
-        <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
-          <input type="checkbox" checked={gridEdge.parcels} onChange={(e) => setGridEdge((g) => ({ ...g, parcels: e.target.checked }))} style={{ marginTop: 3 }} />
-          <span style={{ width: 11, height: 11, borderRadius: 3, background: "#FF6600", marginTop: 3, flex: "none" }} />
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>Parcels</span>
-            <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Parcel-level hosting capacity (~961k). Overzoomed above z13.</span>
-          </span>
-        </label>
-        <label style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", cursor: "pointer" }}>
-          <input type="checkbox" checked={gridEdge.streets} onChange={(e) => setGridEdge((g) => ({ ...g, streets: e.target.checked }))} style={{ marginTop: 3 }} />
-          <span style={{ width: 11, height: 11, borderRadius: 3, background: "#009933", marginTop: 3, flex: "none" }} />
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>MV network zones</span>
-            <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-3)", marginTop: 1, lineHeight: 1.4 }}>Medium-voltage circuit hosting-capacity zones.</span>
-          </span>
-        </label>
-
-        <div style={{ marginTop: 8 }}>
-          <span style={{ fontFamily: "var(--mono)", fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-3)", display: "block", marginBottom: 4 }}>Behavior / season</span>
-          <select
-            value={capacityProp}
-            onChange={(e) => setCapacityProp(e.target.value)}
-            style={{ width: "100%", fontFamily: "var(--sans)", fontSize: 13, padding: "7px 9px", border: "1px solid var(--rule)", borderRadius: 6, background: "#fff", color: "var(--ink)", outline: "none" }}
-          >
-            {CAPACITY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-          </select>
-        </div>
-
-        {/* Color ramp legend (kW). */}
-        <div style={{ display: "flex", marginTop: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--rule-2)" }}>
-          {GE_RAMP.map((r) => (
-            <div key={r.min} title={`${r.label} kW`} style={{ flex: 1, height: 10, background: r.color }} />
-          ))}
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontFamily: "var(--mono)", fontSize: 8.5, color: "var(--ink-3)" }}>
-          <span>0</span><span>500</span><span>2k</span><span>5k+ kW</span>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 
