@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./portal.css";
+import "./lifecycle.css";
 import Sidebar from "./Sidebar";
 import { getSessionUser } from "@/lib/auth";
 

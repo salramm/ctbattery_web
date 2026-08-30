@@ -3,11 +3,13 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import InventoryRail from "./InventoryRail";
 
 type Item = { label: string; href: string };
 
 const OPERATIONS: Item[] = [
   { label: "Dashboard", href: "/portal" },
+  { label: "Pipeline", href: "/portal/pipeline" },
   { label: "Fleet map", href: "/portal/fleet" },
   { label: "ESS qualification", href: "/portal/ess" },
   { label: "ESS contractors", href: "/portal/ess-contractors" },
@@ -38,6 +40,8 @@ export default function Sidebar({ user }: { user: string }) {
             </Link>
           ))}
         </nav>
+        {/* Inventory rail (D4) — persistent across portal screens. */}
+        <InventoryRail />
       </div>
 
       {/* Documentation — last link, pinned at the bottom right above the Signed-in divider. */}
