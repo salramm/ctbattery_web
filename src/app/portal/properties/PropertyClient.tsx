@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { Def } from "../Abbr";
 import {
   isApiError,
   lcGet,
@@ -450,14 +451,23 @@ function UnitTile({ unit }: { unit: PropertyUnit }) {
       : unit.stage_code;
 
   return (
-    <div className={cls} style={{ ["--sc" as string]: color }} title={STAGE_NAME[unit.stage] ?? unit.stage}>
+    <a
+      className={cls}
+      style={{ ["--sc" as string]: color }}
+      title={STAGE_NAME[unit.stage] ?? unit.stage}
+      href={`/portal/systems?id=${unit.id}${unit.stage === "OPERATING" || unit.stage === "S09_LIVE" ? "&lens=op" : ""}`}
+    >
       {unit.health === "FAULT" && <span className="hdot" title="FAULT" />}
-      {unit.blocked_code && <span className="bcode">{unit.blocked_code}</span>}
+      {unit.blocked_code && (
+        <Def k={unit.blocked_code} className="bcode">
+          {unit.blocked_code}
+        </Def>
+      )}
       <div className="ul">{unit.unit_label ?? "—"}</div>
       <div className="us">
         <i />
         <span>{label}</span>
       </div>
-    </div>
+    </a>
   );
 }

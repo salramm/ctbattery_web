@@ -15,6 +15,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { openLifecycleMap } from "../LifecycleMap";
+import { Def } from "../Abbr";
 import {
   advanceSystem,
   isApiError,
@@ -224,6 +226,7 @@ export default function PipelineClient() {
         role="button"
         tabIndex={0}
         aria-label={`${card.address_line ?? card.unit_label ?? "system"} — ${columns[colIdx]?.code}`}
+        onClick={() => router.push(`/portal/systems?id=${card.id}`)}
       >
         <b>{card.address_line ?? card.unit_label ?? "—"}</b>
         <div className="kp">
@@ -241,11 +244,15 @@ export default function PipelineClient() {
 
         <div className="kfoot">
           {card.pills.map((p) => (
-            <span key={p} className={`lpill ${p.toLowerCase()}`}>
+            <Def key={p} k={p} className={`lpill ${p.toLowerCase()}`}>
               {p}
-            </span>
+            </Def>
           ))}
-          {blocked && <span className="blockedtag">{card.blocked_code}</span>}
+          {blocked && (
+            <Def k={card.blocked_code ?? ""} className="blockedtag">
+              {card.blocked_code}
+            </Def>
+          )}
           {age != null && <span className={`age${age >= 5 ? " hot" : ""}`}>{age}d</span>}
         </div>
 
@@ -354,6 +361,11 @@ export default function PipelineClient() {
             {board ? `${board.totals.systems} systems in delivery · ${board.totals.blocked} blocked` : "loading…"}
           </div>
           <div className="principle">Blocked, never backward</div>
+          <div style={{ marginTop: 6 }}>
+            <button type="button" className="btn sm" onClick={openLifecycleMap}>
+              Lifecycle map
+            </button>
+          </div>
         </div>
       </div>
 

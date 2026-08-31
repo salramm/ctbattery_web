@@ -15,6 +15,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { isApiError, lcGet, lcPost } from "@/lib/lifecycle";
+import { useRouter } from "next/navigation";
+import { Def } from "../Abbr";
 
 type Pin = { town: string; count: number; worst: string | null; lat: number | null; lng: number | null; color: string };
 
@@ -79,6 +81,7 @@ const pct = (v: number | null) => (v == null ? "—" : `${(v * 100).toFixed(1)}%
 const kw = (v: number | null) => (v == null ? "—" : v.toFixed(1));
 
 export default function FleetLensClient() {
+  const router = useRouter();
   const [fleet, setFleet] = useState<Fleet | null>(null);
   const [error, setError] = useState("");
   const [polling, setPolling] = useState(false);
@@ -269,7 +272,7 @@ export default function FleetLensClient() {
                 </tr>
               )}
               {fleet.systems.map((s) => (
-                <tr key={s.id} className="lnk">
+                <tr key={s.id} className="lnk" onClick={() => router.push(`/portal/systems?id=${s.id}&lens=op`)}>
                   <td>
                     <b>{s.address ?? s.unit_label ?? "—"}</b>
                     {s.flags.includes("TURNOVER") && (
@@ -285,8 +288,12 @@ export default function FleetLensClient() {
                   </td>
                   <td className="t2">{s.property?.name ?? s.property?.town ?? "—"}</td>
                   <td>
-                    {s.tier && <span className={`lpill ${s.tier === "LI" ? "li" : "und"}`}>{s.tier === "UNDERSERVED" ? "UND" : s.tier}</span>}
-                    {s.grid_edge && <span className="lpill ge" style={{ marginLeft: 4 }}>GE</span>}
+                    {s.tier && (
+                      <Def k={s.tier === "UNDERSERVED" ? "UND" : s.tier} className={`lpill ${s.tier === "LI" ? "li" : "und"}`}>
+                        {s.tier === "UNDERSERVED" ? "UND" : s.tier}
+                      </Def>
+                    )}
+                    {s.grid_edge && <Def k="GE" className="lpill ge">GE</Def>}
                   </td>
                   <td>
                     <span className={`hchip ${HEALTH_CLASS[s.health ?? ""] ?? ""}`}>

@@ -1587,3 +1587,22 @@
   .gsa .sidebar nav a { font-size: 12px; padding: 6px 10px; }
   .gsa .main { padding-left: 16px; padding-right: 16px; }
 }
+
+/* Lifecycle map entry point in the rail (D3). Styled as a nav link so it sits
+   with the section list rather than looking like a form control. */
+.gsa .sidebar .lifecycle-rail-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink-2);
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-top: 6px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+}
+.gsa .sidebar .lifecycle-rail-link:hover { color: var(--ink); background: var(--bg-soft); }

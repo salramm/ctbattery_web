@@ -340,3 +340,26 @@ canvas,
 iframe {
   max-width: 100%;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Lifecycle design tokens — the :root block from docs/lifecycle/mockup.html,
+ * verbatim (05-UI-DELTA §1). These are the lifecycle surfaces' single source
+ * of colour and type.
+ *
+ * Safe to declare globally: every other scope in this app (.ctp, .ctapp,
+ * .ctdoc, .gsa) re-declares the handful of names it shares (--bg, --ink,
+ * --serif/--sans/--mono), so the consumer site and the existing portal are
+ * unaffected. The lifecycle screens (.lc) take these values.
+ * ───────────────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#F7F6F1;--sf:#FFFFFF;--sf2:#FBFAF5;--sf3:#F2F0E9;
+  --bd:#E7E4DA;--bd2:#D8D4C6;
+  --ink:#1C1B16;--t2:#55524A;--t3:#8C887C;
+  --g:#3E6B50;--gd:#2C5140;--gl:#EDF3EE;--gll:#F4F8F5;
+  --a:#9A6B1F;--al:#FBF3E1;
+  --r:#A8402F;--rl:#F9ECE7;
+  --b:#3E5A78;--bl:#EDF1F6;
+  --serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+  /* stage ramp — neutral → green: progress toward earning */
+  --s1:#D9D5C7;--s2:#CFCFBB;--s3:#C2CBAE;--s4:#AFC2A0;--s5:#9AB892;--s6:#84AC83;--s7:#6C9E74;--s8:#549066;--s9:#3E6B50;--sop:#2C5140;
+}

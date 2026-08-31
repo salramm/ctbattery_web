@@ -6,6 +6,7 @@ import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./portal.css";
 import "./lifecycle.css";
 import Sidebar from "./Sidebar";
+import LifecycleMap from "./LifecycleMap";
 import { getSessionUser } from "@/lib/auth";
 
 const dmSerif = DM_Serif_Display({
@@ -72,6 +73,9 @@ export default function PortalLayout({
     >
       <Sidebar user={user} />
       <main className="main">{children}</main>
+      {/* D3 — one overlay for the whole portal; opened from the rail, the
+          Pipeline header and the System ribbon. */}
+      <LifecycleMap />
     </div>
   );
 }

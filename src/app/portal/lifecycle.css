@@ -9,37 +9,17 @@
  */
 
 .lc {
-  /* mock token → portal token */
-  --sf: #fff;
-  --sf2: #fbfaf5;
-  --sf3: var(--bg-soft);
-  --bd: var(--rule);
-  --bd2: var(--ink-5);
-  --t2: var(--ink-2);
-  --t3: var(--ink-3);
-  --g: var(--accent);
-  --gd: var(--accent-ink);
-  --gl: var(--accent-soft);
-  --gll: #f1f6f3;
-  --a: var(--c-amber);
-  --al: var(--c-amber-l);
-  --r: var(--c-red);
-  --rl: var(--c-red-l);
-  --b: var(--c-blue);
-  --bl: var(--c-blue-l);
-
-  /* Stage ramp — neutral→green is semantic (progress toward earning). Reused
-     identically by the kanban headers, the release meter and the unit grid. */
-  --s1: #d9d5c7;
-  --s2: #cfcfbb;
-  --s3: #c2cbae;
-  --s4: #afc2a0;
-  --s5: #9ab892;
-  --s6: #84ac83;
-  --s7: #6c9e74;
-  --s8: #549066;
-  --s9: #3e6b50;
-  --sop: #2c5140;
+  /* Tokens come from the mockup :root in globals.css (05-UI-DELTA §1). Only the
+     two names the surrounding .gsa scope shadows are restated here, so the
+     lifecycle screens render in the mock's palette rather than the portal's. */
+  --bg: #f7f6f1;
+  --ink: #1c1b16;
+  /* Fonts: the portal loads DM Serif/Sans and JetBrains Mono as next/font
+     variables, so point the mock's names at those rather than at family names
+     the app never loads. */
+  --serif: var(--font-dm-serif), Georgia, serif;
+  --sans: var(--font-dm-sans), system-ui, sans-serif;
+  --mono: var(--font-dm-mono), ui-monospace, monospace;
 }
 
 /* ─── screen head ─────────────────────────────────── */
@@ -480,3 +460,185 @@
 .lc .dchain { font-size: 11px; color: var(--t2); }
 .lc .dchain b { font-family: var(--mono); font-size: 12.5px; color: var(--ink); }
 .lc .tblscroll { overflow-x: auto; }
+
+/* ─── glossary (D7) ───────────────────────────────── */
+/* Tooltip styling follows the mock's .abbr::after, but is driven by an `open`
+   class rather than :hover alone so it works on tap. */
+.lc .gabbr,
+.lc .gdef,
+.gabbr,
+.gdef {
+  position: relative;
+  cursor: help;
+  outline: none;
+}
+.gabbr {
+  border-bottom: 1px dotted var(--bd2, #d8d4c6);
+}
+.gabbr:focus-visible,
+.gdef:focus-visible {
+  box-shadow: 0 0 0 2px var(--gl, #edf3ee);
+  border-radius: 4px;
+}
+.gtip {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #1c1b16;
+  color: #fff;
+  font: 400 10.5px var(--sans), system-ui, sans-serif;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 7px 10px;
+  border-radius: 6px;
+  width: max-content;
+  max-width: 260px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.13s, transform 0.13s;
+  z-index: 80;
+  white-space: normal;
+  text-align: left;
+}
+.gabbr:hover > .gtip,
+.gdef:hover > .gtip,
+.gabbr.open > .gtip,
+.gdef.open > .gtip,
+.gabbr:focus-visible > .gtip,
+.gdef:focus-visible > .gtip {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+/* Near the left edge the centred tooltip would clip; anchor it left instead. */
+.gtip.left { left: 0; transform: translateX(0) translateY(4px); }
+.gabbr.open > .gtip.left,
+.gdef.open > .gtip.left { transform: translateX(0); }
+
+/* ─── lifecycle map overlay (D3) ──────────────────── */
+/* Lifted from the mock's .ovl/.lmap block. The React version drives open state
+   with a class rather than `display:none`, and expands rows by mounting them,
+   so `.lrow.open .lbody` becomes a plain `.lbody`. */
+.lmovl {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 27, 22, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh 14px;
+  z-index: 50;
+  overflow-y: auto;
+}
+.lmovl .lmap {
+  background: var(--bg);
+  border: 1px solid var(--bd2);
+  border-radius: 12px;
+  width: min(1000px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 22px 26px 26px;
+  box-shadow: 0 18px 60px rgba(28, 27, 22, 0.22);
+}
+.lc .lmhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.lc .lmhead h2 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin: 0; }
+.lc .lmhead .sub { font-size: 11.5px; color: var(--t2); margin-top: 2px; max-width: 560px; }
+.lc .xbtn {
+  width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--bd2);
+  background: var(--sf); cursor: pointer; font: 600 13px var(--sans); color: var(--t2); flex: none;
+}
+.lc .xbtn:hover { color: var(--ink); border-color: var(--t3); }
+
+.lc .eraband { display: flex; gap: 5px; margin: 16px 0 4px; }
+.lc .eraseg { flex: var(--f); border-radius: 6px; padding: 7px 10px; color: #fff; background: var(--ec); }
+.lc .eraseg b { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; display: block; }
+.lc .eraseg span { font-size: 9.5px; opacity: 0.85; font-family: var(--mono); }
+
+.lc .lrows { margin-top: 14px; }
+.lc .lrow { background: var(--sf); border: 1px solid var(--bd); border-radius: 9px; }
+.lc .lhead {
+  display: flex; align-items: center; gap: 11px; padding: 10px 14px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.lc .lhead:hover { background: var(--sf2); }
+.lc .lhead .ldot {
+  width: 13px; height: 13px; border-radius: 50%; background: var(--sc); flex: none;
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--sc);
+}
+.lc .lhead .lcode { font-family: var(--mono); font-size: 9.5px; color: var(--t3); width: 30px; flex: none; }
+.lc .lhead b { font-size: 13px; }
+.lc .lhead .lmean { font-size: 11px; color: var(--t3); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc .ltag { font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em; color: var(--t3); text-transform: uppercase; }
+.lc .lhead .caret { font-family: var(--mono); font-size: 10px; color: var(--t3); transition: transform 0.12s; }
+.lc .lrow.open .caret { transform: rotate(180deg); }
+
+.lc .lbody { border-top: 1px solid var(--sf3); padding: 12px 14px 14px 54px; }
+.lc .lgrp { margin-bottom: 10px; }
+.lc .lgrp:last-child { margin-bottom: 0; }
+.lc .lgl { font-family: var(--mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; }
+.lc .gline { display: flex; align-items: center; gap: 8px; font-size: 11.5px; padding: 3px 0; flex-wrap: wrap; }
+.lc .gline i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--bd2); flex: none; display: inline-block; }
+.lc .gline .auto {
+  font-family: var(--mono); font-size: 7.5px; font-weight: 700; color: var(--b);
+  background: var(--bl); border-radius: 3px; padding: 1px 5px; letter-spacing: 0.06em;
+}
+.lc .gline .xref { font-family: var(--mono); font-size: 8.5px; color: var(--gd); }
+.lc .lchips { display: flex; gap: 5px; flex-wrap: wrap; }
+.lc .lclk {
+  font-family: var(--mono); font-size: 9.5px; color: var(--a); background: var(--al);
+  border: 1px solid #efe2c4; border-radius: 4px; padding: 2px 7px;
+}
+.lc .lcon { display: flex; align-items: center; gap: 9px; padding: 5px 0 5px 19px; }
+.lc .lcon .cline { width: 1.5px; height: 22px; background: var(--bd2); margin-left: 5px; }
+.lc .lcon .ctrig { font-family: var(--mono); font-size: 9px; color: var(--t2); background: var(--sf3); border-radius: 5px; padding: 2.5px 9px; }
+.lc .lcon .ctrig b { color: var(--gd); letter-spacing: 0.06em; }
+.lc .lcon .ctrig b.man { color: var(--b); }
+.lc .lrules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 11px; margin-top: 16px; }
+.lc .lrule { background: var(--sf2); border: 1px dashed var(--bd2); border-radius: 8px; padding: 10px 13px; font-size: 10.5px; color: var(--t2); }
+.lc .lrule b { display: block; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); margin-bottom: 4px; }
+.lc .t2 { color: var(--t2); }
+
+/* ─── system page (03 §System page) ───────────────── */
+.lc .lens { display: inline-flex; gap: 4px; background: var(--sf3); border-radius: 8px; padding: 3px; }
+.lc .lens .lb {
+  font: 600 10.5px var(--sans); padding: 5px 11px; border-radius: 6px; color: var(--t2);
+  cursor: pointer; border: 0; background: none; display: flex; align-items: center; gap: 6px;
+}
+.lc .lens .lb.on { background: var(--sf); color: var(--ink); box-shadow: 0 1px 0 var(--bd); }
+.lc .lens .lb i { width: 7px; height: 7px; border-radius: 50%; background: var(--bd2); }
+.lc .lens .lb.on i { background: var(--g); }
+
+.lc .ribbonwrap { padding: 4px 0 2px; }
+.lc .ribbon { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; }
+.lc .rst { text-align: center; opacity: 0.55; }
+.lc .rst .rd {
+  height: 5px; border-radius: 3px; background: var(--bd); margin-bottom: 5px;
+}
+.lc .rst.done { opacity: 1; }
+.lc .rst.done .rd, .lc .rst.cur .rd { background: var(--rc); }
+.lc .rst.cur { opacity: 1; }
+.lc .rst.cur .rl { color: var(--ink); font-weight: 700; }
+.lc .rst.cur.blkd .rd { background: var(--r); }
+.lc .rst .rl { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--t3); }
+.lc .rst .rn { font-size: 8.5px; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.lc .blockbanner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--rl); border: 1px solid #eed6cf; border-radius: 8px;
+  padding: 9px 12px; margin-top: 12px; font-size: 11.5px; color: var(--t2);
+}
+.lc .blockbanner .code { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--r); }
+
+.lc .nextact {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-top: 1px solid var(--sf3); margin-top: 14px; padding-top: 12px; font-size: 12.5px;
+}
+.lc .nextact .lgl { margin-bottom: 0; }
+
+.lc .xidchip {
+  font-family: var(--mono); font-size: 9px; color: var(--t2);
+  background: var(--sf3); border-radius: 5px; padding: 3px 8px;
+}
+.lc .xidchip b { color: var(--gd); margin-right: 5px; }
+.lc .lifelink { border: 0; background: none; padding: 0; }

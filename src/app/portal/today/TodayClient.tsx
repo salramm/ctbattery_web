@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { isApiError, lcGet, lcPost, type ApiError } from "@/lib/lifecycle";
+import { Def } from "../Abbr";
 
 type RowAction = { label: string; href?: string; endpoint?: string; method?: "POST" | "PATCH" };
 
@@ -167,7 +168,11 @@ export default function TodayClient() {
                 </div>
 
                 {severityChip(section.key, row.severity)}
-                {section.key === "blocked" && <span className="blockedtag">{row.label}</span>}
+                {section.key === "blocked" && (
+                  <Def k={row.label} className="blockedtag">
+                    {row.label}
+                  </Def>
+                )}
                 <span className="meta">{row.metric}</span>
 
                 {row.action.endpoint ? (

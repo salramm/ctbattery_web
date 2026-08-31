@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 import InventoryRail from "./InventoryRail";
+import { openLifecycleMap } from "./LifecycleMap";
 
 type Item = { label: string; href: string };
 
@@ -43,6 +44,15 @@ export default function Sidebar({ user }: { user: string }) {
             </Link>
           ))}
         </nav>
+        {/* Lifecycle map (D3) — the persistent rail entry point. */}
+        <button
+          type="button"
+          className="lifecycle-rail-link"
+          onClick={openLifecycleMap}
+        >
+          Lifecycle map
+        </button>
+
         {/* Inventory rail (D4) — persistent across portal screens. */}
         <InventoryRail />
       </div>
