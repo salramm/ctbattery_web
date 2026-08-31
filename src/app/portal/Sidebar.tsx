@@ -8,6 +8,7 @@ import InventoryRail from "./InventoryRail";
 type Item = { label: string; href: string };
 
 const OPERATIONS: Item[] = [
+  { label: "Today", href: "/portal/today" },
   { label: "Dashboard", href: "/portal" },
   { label: "Pipeline", href: "/portal/pipeline" },
   { label: "Fleet map", href: "/portal/fleet" },

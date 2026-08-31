@@ -401,3 +401,51 @@
 @media (max-width: 960px) {
   .invbox { display: none; }
 }
+
+/* ─── Today queue (03 §Today, D8) ─────────────────── */
+.lc .trow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--sf3);
+}
+.lc .trow:last-child { border-bottom: none; }
+.lc .trow .bar { width: 3px; align-self: stretch; border-radius: 2px; flex: none; min-height: 34px; }
+.lc .trow .body { flex: 1; min-width: 0; }
+.lc .trow .who { font-weight: 600; font-size: 12.5px; color: var(--ink); }
+.lc .trow .what { font-size: 11.5px; color: var(--t2); margin-top: 1px; }
+.lc .trow .meta { font-family: var(--mono); font-size: 9.5px; color: var(--t3); white-space: nowrap; }
+.lc .trow.lnk { cursor: pointer; }
+.lc .trow.lnk:hover { background: var(--sf2); }
+
+.lc .hchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  padding: 2.5px 8px;
+  white-space: nowrap;
+}
+.lc .hchip i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.lc .h-watch { background: var(--al); color: var(--a); }
+.lc .h-watch i { background: #c08a2e; }
+.lc .h-fault { background: var(--rl); color: var(--r); }
+.lc .h-fault i { background: var(--r); }
+.lc .h-due { background: var(--rl); color: var(--r); }
+.lc .h-due i { background: var(--r); }
+
+/* D8 — the date block: server clock, America/New_York */
+.lc .datebig { text-align: right; }
+.lc .datebig .dl1 {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.lc .datebig .dl2 { font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 1px; color: var(--ink); }
+.lc .datebig .dl2 span { font-size: 10px; font-weight: 400; color: var(--t3); margin-left: 7px; }
