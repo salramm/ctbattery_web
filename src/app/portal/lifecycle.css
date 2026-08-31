@@ -449,3 +449,34 @@
 }
 .lc .datebig .dl2 { font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 1px; color: var(--ink); }
 .lc .datebig .dl2 span { font-size: 10px; font-weight: 400; color: var(--t3); margin-left: 7px; }
+
+/* ─── Fleet lens (03 §Fleet) ──────────────────────── */
+.lc .stripe {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  background: var(--sf);
+  border: 1px solid var(--bd);
+  border-radius: 9px;
+  padding: 14px 18px;
+}
+.lc .grid2 { display: grid; gap: 12px; align-items: start; }
+@media (max-width: 1000px) {
+  .lc .grid2 { grid-template-columns: 1fr !important; }
+}
+.lc .mapwrap svg { display: block; }
+.lc .maplbl {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  fill: var(--t3);
+}
+.lc .mappin { cursor: pointer; }
+.lc .h-ok { background: var(--gl); color: var(--gd); }
+.lc .h-ok i { background: var(--g); }
+.lc .h-svc { background: var(--bl); color: var(--b); }
+.lc .h-svc i { background: var(--b); }
+.lc .derate { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.lc .dchain { font-size: 11px; color: var(--t2); }
+.lc .dchain b { font-family: var(--mono); font-size: 12.5px; color: var(--ink); }
+.lc .tblscroll { overflow-x: auto; }
