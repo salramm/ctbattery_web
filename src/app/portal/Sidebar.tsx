@@ -12,6 +12,7 @@ const OPERATIONS: Item[] = [
   { label: "Dashboard", href: "/portal" },
   { label: "Pipeline", href: "/portal/pipeline" },
   { label: "Fleet", href: "/portal/fleet-lens" },
+  { label: "Money", href: "/portal/money" },
   { label: "Fleet map (legacy)", href: "/portal/fleet" },
   { label: "ESS qualification", href: "/portal/ess" },
   { label: "ESS contractors", href: "/portal/ess-contractors" },

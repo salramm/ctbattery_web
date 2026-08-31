@@ -226,3 +226,19 @@ export function advanceSystem(id: string) {
     { via: "MANUAL" },
   );
 }
+
+/** D5 — Pipeline ITC thread strip aggregates (GET /api/itc/thread). */
+export type ItcThread = {
+  stages: Array<{ status: string; count: number; credit: number; current: boolean }>;
+  current: string | null;
+  total_claims: number;
+  allocation: {
+    program_year: number;
+    category: string;
+    kw_awarded: number;
+    kw_consumed: number;
+    kw_remaining: number;
+    award_doc_id: string | null;
+  } | null;
+  cohorts: Record<string, number>;
+};

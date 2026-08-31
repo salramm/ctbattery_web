@@ -25,6 +25,7 @@ import {
   type BoardCard,
   type BoardFilterOptions,
   type Deal,
+  type ItcThread,
 } from "@/lib/lifecycle";
 
 type Tab = "delivery" | "deals";
@@ -39,6 +40,16 @@ type Filters = {
 
 const EMPTY: Filters = { property_id: "", tier: "", town: "", installer: "", blocked_only: false };
 
+/** Claim-state copy for the D5 strip, locked by the mock. */
+const STAGE_COPY: Record<string, string> = {
+  ACCRUING: "S05 · CLAIM OPENS — ACCRUING",
+  BASIS_LOCKED: "COF → BASIS LOCKED",
+  EVIDENCE_COMPLETE: "EVIDENCE COMPLETE",
+  IN_COHORT: "IN COHORT",
+  TRANSFERRED: "TRANSFERRED",
+};
+const STAGE_ORDER_ITC = ["ACCRUING", "BASIS_LOCKED", "EVIDENCE_COMPLETE", "IN_COHORT", "TRANSFERRED"];
+
 /** Toast copy is locked by the mock (05-UI-DELTA D2) — lifted verbatim. */
 function skipCopy(from: number, to: number) {
   return `<b>ONE STAGE AT A TIME</b> — S0${from} → S0${to} would skip S0${from + 1}`;
@@ -50,6 +61,7 @@ export default function PipelineClient() {
   const [board, setBoard] = useState<Board | null>(null);
   const [options, setOptions] = useState<BoardFilterOptions | null>(null);
   const [deals, setDeals] = useState<Deal[] | null>(null);
+  const [thread, setThread] = useState<ItcThread | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [groupByProperty, setGroupByProperty] = useState(false);
   const [error, setError] = useState("");
@@ -105,6 +117,9 @@ export default function PipelineClient() {
 
   useEffect(() => {
     lcGet<BoardFilterOptions>("/api/pipeline/filters").then(setOptions).catch(() => {});
+    // D5 — the strip renders live claim-state aggregates, not the mock's
+    // static counts (§4 shim #5).
+    lcGet<ItcThread>("/api/itc/thread").then(setThread).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -446,24 +461,39 @@ export default function PipelineClient() {
             )}
           </div>
 
-          {/* ITC credit thread strip (D5) — claim-state counts wire up in P9. */}
+          {/* ITC credit thread strip (D5) — live claim-state aggregates. */}
           <div className="card pad" style={{ marginTop: 6 }}>
             <div className="cardlbl">
-              <span>ITC credit thread — runs alongside delivery</span>
+              <span>
+                ITC credit thread — runs alongside delivery
+                {thread ? ` · ${thread.total_claims} claim${thread.total_claims === 1 ? "" : "s"}` : ""}
+              </span>
               <span className="lpill">§48E · transferred via §6418</span>
             </div>
             <div className="row" style={{ gap: 10, flexWrap: "wrap", alignItems: "center" }}>
               <div className="cpipe">
-                <i className="f">S05 · CLAIM OPENS — ACCRUING</i>
-                <i className="f">BASIS FROM PO · WO · PERMIT</i>
-                <i className="cur">COF → BASIS LOCKED</i>
-                <i>EVIDENCE COMPLETE</i>
-                <i>IN COHORT</i>
-                <i>TRANSFERRED</i>
+                {thread
+                  ? thread.stages.map((st) => (
+                      <i
+                        key={st.status}
+                        className={st.current ? "cur" : st.count > 0 ? "f" : ""}
+                        title={st.credit ? `$${Math.round(st.credit).toLocaleString("en-US")} of credit` : undefined}
+                      >
+                        {STAGE_COPY[st.status] ?? st.status} · {st.count}
+                      </i>
+                    ))
+                  : STAGE_ORDER_ITC.map((k) => (
+                      <i key={k}>{STAGE_COPY[k]}</i>
+                    ))}
               </div>
               <span className="lclk">
-                48E(h) LI allocation · apply before LI units reach PIS
+                {thread?.allocation
+                  ? `48E(h) ${thread.allocation.category} ${thread.allocation.program_year} · ${thread.allocation.kw_remaining} of ${thread.allocation.kw_awarded} kW left — apply before LI units reach PIS`
+                  : "48E(h) LI allocation · apply before LI units reach PIS"}
               </span>
+              <Link href="/portal/money?desk=itc" className="lifelink">
+                Open the ITC desk →
+              </Link>
             </div>
             <div className="stamp" style={{ marginTop: 9 }}>
               Drag any card one column right — the gate answers. Blocked and unmet cards tell you why. Backward moves
